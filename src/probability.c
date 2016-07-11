@@ -117,34 +117,23 @@ void solveLP(){
 	//engEvalString(gEp, "close;");
 }
 
-void calculateProbability(staInfo sta[], apInfo *ap, int mode){
-	int nodeID;
-	int i;
+void calculateProbability(staInfo sta[], apInfo *ap){
 	double delay[NUM_STA+1] = {};
-	if(mode == 0){   //random
-		nodeID = rand() % gSpec.numSta;
-		for(i=0; i<gSpec.numSta; i++){
-			if(i==nodeID){
-				sta[i].fTx = true;
-			}else{
-				sta[i].fTx = false;
-			}
-		}
-	}else{   //probability
-		//calculateDelay
-		if(gSpec.proMode==1||gSpec.proMode==2){
-			calculateDelay(ap, sta, delay);
-		}
-		calculateRSSI(ap, sta, delay);
-		solveLP();
-		//selectNode(sta, fUpColl, fNoUplink);
+	//probability
+	//calculateDelay
+	if(gSpec.proMode==1||gSpec.proMode==2||gSpec.proMode==4){
+		calculateDelay(ap, sta, delay);
 	}
+	calculateRSSI(ap, sta, delay);
+	solveLP();
 }
 
 void initializeMatrix(){
 	int tate = NUM_STA * 2;
 	int yoko = pow((NUM_STA+1), 2);
 	int i, j, no;
+	int delayNode = 5;
+	double giveU = 0.5;
 
 	for(i=0; i<NUM_STA; i++){
 		for(j=0; j<yoko; j++){
@@ -198,8 +187,21 @@ void initializeMatrix(){
 			}
 		}
 	}
-	for(i=0; i<NUM_STA*2; i++){
-		u[i] = -100/(2*NUM_STA);
+
+	if(gSpec.proMode!=3&&gSpec.proMode!=4){
+		for(i=0; i<NUM_STA*2; i++){
+			u[i] = -100/(2*NUM_STA);
+		}
+	}else{
+		for(i=0; i<NUM_STA*2; i++){
+			if(i<NUM_STA*2-delayNode){
+				u[i] = -100/(2*NUM_STA) + giveU;
+				printf("%f\n", u[i]);
+			}else{
+				u[i] = -100/(2*NUM_STA) - giveU*(NUM_STA-delayNode)/delayNode;
+				printf("%f\n", u[i]);
+			}
+		}
 	}
 }
 

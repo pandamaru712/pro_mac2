@@ -45,7 +45,7 @@ void simulationResult(staInfo sta[], apInfo *ap, resultInfo *result, int trialID
 	//printf("\n");
 	for(i=0; i<NUM_STA; i++){
 		tempColl += (double)sta[i].numCollFrame / sta[i].numTxFrame;
-		printf("%f, ", (double)sta[i].numTxFrame / gSpec.chance);
+		printf("%f, ", sta[i].sumDelay / sta[i].numSuccFrame);
 		//printf("%f, ", (double)sta[i].numCollFrame / sta[i].numTxFrame);
 	}
 	printf("\n");

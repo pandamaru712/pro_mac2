@@ -68,6 +68,7 @@ typedef struct specification{
 	int proMode;
 	int position;
 	double delayPower;
+	double giveU;
 }simSpec;
 
 void simSetting(int, char**);

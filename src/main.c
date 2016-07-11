@@ -86,14 +86,14 @@ int main(int argc, char *argv[]){
 		gElapsedTime = gStd.difs;
 		initializeMatrix();
 		printf("Initialization NodeInfo and Matrix.\n");
-		calculateProbability(sta, &ap, 1);
+		calculateProbability(sta, &ap);
 
 		for( ;gElapsedTime<gSpec.simTime*1000000; ){
 			transmission(sta, &ap);
 
 			if(lastBeacon+100000<gElapsedTime){
-				if(gSpec.proMode==1 || gSpec.proMode==2){
-					calculateProbability(sta, &ap, 1);
+				if(gSpec.proMode!=0){
+					calculateProbability(sta, &ap);
 				}
 				lastBeacon = gElapsedTime;
 			}

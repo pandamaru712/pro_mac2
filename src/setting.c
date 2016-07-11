@@ -26,6 +26,7 @@ static struct option options[] = {
 	{"opt", required_argument, NULL, 'p'},
 	{"position", required_argument, NULL, 'x'},
 	{"power", required_argument, NULL, 'w'},
+	{"give", required_argument, NULL, 'g'},
 	{0, 0, 0, 0}
 };
 
@@ -48,6 +49,7 @@ void simSetting(int argc, char **argv){
 	gSpec.proMode = 0;
 	gSpec.position = 0;
 	gSpec.delayPower = 1;
+	gSpec.giveU = 5.0;
 	memset(gSpec.filename, '\0', strlen(gSpec.filename));
 
 	time_t timer;
@@ -81,6 +83,9 @@ void simSetting(int argc, char **argv){
 					"      0: Data rate.\n"
 					"      1: Data rate x delay.\n"
 					"      2: delay is used to subject.\n"
+					"      3: 0 + giveU.\n"
+					"      4: 1 + giveU.\n"
+					"   -g, --give: Give probability to priority nodes.\n"
 				);
 				exit(1);
 				break;
@@ -132,6 +137,9 @@ void simSetting(int argc, char **argv){
 			case 'w':
 				gSpec.delayPower = atof(optarg);
 				break;
+			case 'g':
+				gSpec.giveU = atof(optarg);
+				break;
 			default:
 				printf("Illegal options! \'%c\' \'%c\'\n", opt, optopt);
 				exit(1);
@@ -170,6 +178,9 @@ void simSetting(int argc, char **argv){
 		printf("   Output to %s.\n", gSpec.filename);
 	}
 	printf("   PRO_MODE is %d.\n", gSpec.proMode);
+	if(gSpec.proMode==3||gSpec.proMode==4){
+		printf("   giveU is %f.\n", gSpec.giveU);
+	}
 	if(gSpec.position==0){
 		printf("   AP is (0, 0) and STAs are deployed concentrically.\n");
 	}else if(gSpec.position==1){
