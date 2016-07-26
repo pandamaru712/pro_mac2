@@ -7,7 +7,7 @@
 #include "limits.h"
 
 extern std11 gStd;
-extern FILE *gFp;
+extern FILE *gFileTopology;
 
 void initializeResult(resultInfo *result){
 	result->aveStaThroughput = 0.0;
@@ -66,7 +66,7 @@ void initializeNodeInfo(staInfo sta[], apInfo* ap){
 	ap->fTx = false;
 	//ap->sumFrameLengthInBuffer = 0;
 	ap->sumDelay = 0.0;
-	if(gSpec.position==0 == gSpec.position==1){
+	if(gSpec.position==0 || gSpec.position==1 || gSpec.position==3){
 		ap->x = 0.0;
 		ap->y = 0.0;
 	}else if(gSpec.position==2){
@@ -115,10 +115,11 @@ void initializeNodeInfo(staInfo sta[], apInfo* ap){
 		}else if(gSpec.position==1 || gSpec.position==2){
 			sta[i].x = (double)rand() / RAND_MAX * gSpec.areaSize - (double)gSpec.areaSize / 2;
 			sta[i].y = (double)rand() / RAND_MAX * gSpec.areaSize - (double)gSpec.areaSize / 2;
-			//fscanf(gFp, "%lf", &tempX);
-			//fscanf(gFp, "%lf", &tempY);
-			//sta[i].x = tempX;
-			//sta[i].y = tempY;
+		}else{
+			fscanf(gFileTopology, "%lf", &tempX);
+			fscanf(gFileTopology, "%lf", &tempY);
+			sta[i].x = tempX;
+			sta[i].y = tempY;
 		}
 		printf("%f, %f\n", sta[i].x, sta[i].y);
 		sta[i].distanceAp = sqrt(pow(sta[i].x, 2)+pow(sta[i].y, 2));

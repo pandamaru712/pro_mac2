@@ -22,7 +22,7 @@ double gElapsedTime;
 std11 gStd;
 simSpec gSpec;
 FILE *gFileSta;
-FILE *gFp;
+FILE *gFileTopology;
 
 Engine *gEp;
 double r[(NUM_STA+1)*(NUM_STA+1)] = {};//{-1, -4, -45, -51, -29, -42, -16, -1, -25, -39, -24, -35, -3, -23, -1, -56, -78, -10, -11, -34, -22, -1, -7, -67, -45, -23, -65, -55, -1, -76, -12, -6, -95, -67, -52, -1};
@@ -64,10 +64,12 @@ int main(int argc, char *argv[]){
 	bool fEmpty = false;
 	double lastBeacon = 0;
 
-	gFp = fopen("topology.txt", "r");
-	if(gFp==NULL){
-		printf("Can not open topology file.\n");
-		exit(92);
+	if(gSpec.position==3){
+		gFileTopology = fopen("topology.txt", "r");
+		if(gFileTopology==NULL){
+			printf("Can not open topology file.\n");
+			exit(92);
+		}
 	}
 
 	if(!(gEp = engOpen(""))){
@@ -78,7 +80,7 @@ int main(int argc, char *argv[]){
 
 	for (trialID=0; trialID<gSpec.numTrial; trialID++){
 		printf("\n***** No. %d *****\n", trialID);
-		srand(trialID);
+		srand(9);
 		numTx = 0;
 		fEmpty = false;
 		lastBeacon = 0;
@@ -92,7 +94,7 @@ int main(int argc, char *argv[]){
 			transmission(sta, &ap);
 
 			if(lastBeacon+100000<gElapsedTime){
-				if(gSpec.proMode!=0){
+				if(gSpec.proMode!=0 && gSpec.proMode!=3){
 					calculateProbability(sta, &ap);
 				}
 				lastBeacon = gElapsedTime;
@@ -111,7 +113,9 @@ int main(int argc, char *argv[]){
 
 	engEvalString(gEp, "close;");
 	engClose(gEp);
-	fclose(gFp);
+	if(gSpec.position==3){
+		fclose(gFileTopology);
+	}
 	printf("Close MATLAB.\nFinish.\n");
 	return 0;
 }

@@ -132,8 +132,6 @@ void initializeMatrix(){
 	int tate = NUM_STA * 2;
 	int yoko = pow((NUM_STA+1), 2);
 	int i, j, no;
-	int delayNode = 5;
-	double giveU = 0.5;
 
 	for(i=0; i<NUM_STA; i++){
 		for(j=0; j<yoko; j++){
@@ -194,11 +192,13 @@ void initializeMatrix(){
 		}
 	}else{
 		for(i=0; i<NUM_STA*2; i++){
-			if(i<NUM_STA*2-delayNode){
-				u[i] = -100/(2*NUM_STA) + giveU;
+			if(i<NUM_STA){
+				u[i] = -100/(2*NUM_STA);
+			}else if(i<NUM_STA*2-gSpec.delaySTA){
+				u[i] = -100/(2*NUM_STA) + gSpec.giveU;
 				printf("%f\n", u[i]);
 			}else{
-				u[i] = -100/(2*NUM_STA) - giveU*(NUM_STA-delayNode)/delayNode;
+				u[i] = -100/(2*NUM_STA) - gSpec.giveU*(NUM_STA-gSpec.delaySTA)/gSpec.delaySTA;
 				printf("%f\n", u[i]);
 			}
 		}

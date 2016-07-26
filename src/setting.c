@@ -27,6 +27,7 @@ static struct option options[] = {
 	{"position", required_argument, NULL, 'x'},
 	{"power", required_argument, NULL, 'w'},
 	{"give", required_argument, NULL, 'g'},
+	{"dnode", required_argument, NULL, 'e'},
 	{0, 0, 0, 0}
 };
 
@@ -49,7 +50,8 @@ void simSetting(int argc, char **argv){
 	gSpec.proMode = 0;
 	gSpec.position = 0;
 	gSpec.delayPower = 1;
-	gSpec.giveU = 5.0;
+	gSpec.giveU = 0.5;
+	gSpec.delaySTA = 5;
 	memset(gSpec.filename, '\0', strlen(gSpec.filename));
 
 	time_t timer;
@@ -57,7 +59,7 @@ void simSetting(int argc, char **argv){
 	timer = time(NULL);
 	local = localtime(&timer);
 
-	while((opt = getopt_long(argc, argv, "hdfos:n:t:l:r:m:a:u:b:p:x:w:", options, &index)) != -1){
+	while((opt = getopt_long(argc, argv, "hdfos:n:t:l:r:m:a:u:b:p:x:w:g:e:", options, &index)) != -1){
 		switch(opt){
 			case 'h':
 				printf(
@@ -74,11 +76,12 @@ void simSetting(int argc, char **argv){
 					"   -a, --delay: delayMode (0/1).\n"
 					"   -u, --output: Output filename.\n"
 					"   -b, --area: Area size (m).\n"
-					"   -x, --position: Node's position.\n"
 					"   -w, --power: delayPower.\n"
+					"   -x, --position: Node's position.\n"
 					"      0; AP is (0, 0) and STAs are deployed concentrically.\n"
 					"      1; AP is (0, 0) and STAs are randomly deployed.\n"
 					"      2; AP and STAs are randomly deployed.\n"
+					"      3: Load topology file (AP is (0,0)).\n"
 					"   -p, --opt: Evaluation function mode.\n"
 					"      0: Data rate.\n"
 					"      1: Data rate x delay.\n"
@@ -86,6 +89,7 @@ void simSetting(int argc, char **argv){
 					"      3: 0 + giveU.\n"
 					"      4: 1 + giveU.\n"
 					"   -g, --give: Give probability to priority nodes.\n"
+					"   -e, --dnode: Number of STAs which require short delay.\n"
 				);
 				exit(1);
 				break;
@@ -139,6 +143,13 @@ void simSetting(int argc, char **argv){
 				break;
 			case 'g':
 				gSpec.giveU = atof(optarg);
+				if(gSpec.giveU>100/(NUM_STA*2)){
+					printf("giveU is too large!.\n");
+					exit(87);
+				}
+				break;
+			case 'e':
+				gSpec.delaySTA = atof(optarg);
 				break;
 			default:
 				printf("Illegal options! \'%c\' \'%c\'\n", opt, optopt);
@@ -180,6 +191,7 @@ void simSetting(int argc, char **argv){
 	printf("   PRO_MODE is %d.\n", gSpec.proMode);
 	if(gSpec.proMode==3||gSpec.proMode==4){
 		printf("   giveU is %f.\n", gSpec.giveU);
+		printf("   delaySTA is %d.\n", gSpec.delaySTA);
 	}
 	if(gSpec.position==0){
 		printf("   AP is (0, 0) and STAs are deployed concentrically.\n");
@@ -187,6 +199,8 @@ void simSetting(int argc, char **argv){
 		printf("   AP is (0, 0) and STAs are randomly deployed.\n");
 	}else if(gSpec.position==2){
 		printf("   AP and STAs are randomly deployed.\n");
+	}else if(gSpec.position==3){
+		printf("   AP is (0,0) and STAs are deployed with topology.txt\n");
 	}else{
 		printf("   Position option is failed.\n");
 		exit(1);
