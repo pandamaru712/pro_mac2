@@ -35,7 +35,7 @@ double Aeq[2][(NUM_STA+1)*(NUM_STA+1)];
 double beq[2] = {100, 0};
 double lb[(NUM_STA+1)*(NUM_STA+1)] = {};
 
-//void simSetting(int, char**);
+void showProgression(int*);
 
 int main(int argc, char *argv[]){
 	//Check option values from command line.
@@ -63,9 +63,10 @@ int main(int argc, char *argv[]){
 	int trialID;
 	bool fEmpty = false;
 	double lastBeacon = 0;
+	int previousCount = 0;
 
 	if(gSpec.position==3){
-		gFileTopology = fopen("topology.txt", "r");
+		gFileTopology = fopen("topology_9.txt", "r");
 		if(gFileTopology==NULL){
 			printf("Can not open topology file.\n");
 			exit(92);
@@ -89,16 +90,20 @@ int main(int argc, char *argv[]){
 		initializeMatrix();
 		printf("Initialization NodeInfo and Matrix.\n");
 		calculateProbability(sta, &ap);
-
+		previousCount = 0;
+		printf("                     :   0%%");
 		for( ;gElapsedTime<gSpec.simTime*1000000; ){
 			transmission(sta, &ap);
 
 			if(lastBeacon+100000<gElapsedTime){
-				if(gSpec.proMode!=0 && gSpec.proMode!=3){
+				if(gSpec.proMode!=0 && gSpec.proMode!=3 && gSpec.proMode!=5){
 					calculateProbability(sta, &ap);
 				}
 				lastBeacon = gElapsedTime;
 			}
+			#ifdef PROGRESS
+			showProgression(&previousCount);
+			#endif
 		}
 
 		simulationResult(sta, &ap, &result, trialID);
@@ -118,4 +123,40 @@ int main(int argc, char *argv[]){
 	}
 	printf("Close MATLAB.\nFinish.\n");
 	return 0;
+}
+
+void showProgression(int *previousCount){
+	double progression;
+	int count;
+	int i;
+	char str[256] = {};
+	char str2[256] = {};
+	if(gElapsedTime<gSpec.simTime*1000000){
+		progression = gElapsedTime / (gSpec.simTime * 1000000);
+	}else{
+		progression = 1;
+	}
+	count = (int)(progression * 100) / 5;
+	//printf("%d, %d | ", *previousCount, count);
+	fflush(stdout);
+	if(*previousCount<count){
+		for(i=0; i<count; i++){
+			strcat(str, "#");
+		}
+		for(; i<20; i++){
+			strcat(str, " ");
+		}
+		if(count<2){
+			sprintf(str2, " :   %d%%", count*5);
+			strcat(str, str2);
+		}else if(count<20){
+			sprintf(str2, " :  %d%%", count*5);
+			strcat(str, str2);
+		}else{
+			sprintf(str2, " : 100%%\n");
+			strcat(str, str2);
+		}
+		printf("\r%s", str);
+	}
+	*previousCount = count;
 }

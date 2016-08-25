@@ -29,7 +29,7 @@ void solveLP(){
 	int yoko = pow(NUM_STA+1, 2);
 	//char buffer[EP_BUFFER_SIZE] = {'\0'};
 
-	printf("Setting matrixes.\n");
+	optimizationPrintf("Setting matrixes.\n");
 
 	mxArray *mx_p = NULL;
 	mxArray *mx_fval = NULL;
@@ -67,7 +67,7 @@ void solveLP(){
 	//engEvalString(gEp, "mx_r");
 	//printf("%s", buffer);
 
-	printf("Optimization starts.\n");
+	optimizationPrintf("Optimization starts.\n");
 
 	engEvalString(gEp, "[p, fval] = linprog(mx_r, mx_A, mx_u, mx_Aeq, mx_beq, mx_lb, []);");
 	//printf("%s", buffer);
@@ -82,29 +82,28 @@ void solveLP(){
 	for(i=0; i<yoko; i++){
 		if(p[i]>=0.000001){
 			pro[i/(NUM_STA+1)][i%(NUM_STA+1)] = p[i];
-			//printf("%f,", p[i]);
 		}else{
 			pro[i/(NUM_STA+1)][i%(NUM_STA+1)] = 0;
 		}
-		//printf("%f, ", p[i]);
+		probabilityPrintf("%f, ", p[i]);
 	}
-	//printf("\n\n");
-	printf("Optimization terminated.\n");
-	/*printf("***** Probability *****\n");
+	probabilityPrintf("\n\n");
+	optimizationPrintf("Optimization terminated.\n");
+	probabilityPrintf("***** Probability *****\n");
 	for(i=0; i<=NUM_STA; i++){
 		for(j=0; j<=NUM_STA; j++){
-			printf("%f,", pro[i][j]);
+			probabilityPrintf("%f,", pro[i][j]);
 		}
-		printf("\n");
+		probabilityPrintf("\n");
 	}
 
 	for(i=0; i<yoko; i++){
 		if(p[i]>0.00001){
-			//printf("\n   p[%d] = %f\n", i, p[i]);
+			probabilityPrintf("\n   p[%d] = %f\n", i, p[i]);
 		}
 	}
-	printf("   fval = %f\n", *fval);
-	printf("***** Probability *****\n\n ");*/
+	probabilityPrintf("   fval = %f\n", *fval);
+	probabilityPrintf("***** Probability *****\n\n ");
 
 	mxDestroyArray(mx_r);
 	mxDestroyArray(mx_A);
@@ -140,9 +139,9 @@ void initializeMatrix(){
 			}else{
 				dummyA[i][j] = 0;
 			}
-			//printf("%f ", dummyA[i][j]);
+			matrixPrintf("%f ", dummyA[i][j]);
 		}
-		//printf("\n");
+		matrixPrintf("\n");
 	}
 	for(i=NUM_STA; i<NUM_STA*2; i++){
 		for(j=0; j<yoko; j++){
@@ -151,9 +150,9 @@ void initializeMatrix(){
 			}else{
 				dummyA[i][j] = 0;
 			}
-			//printf("%f ", dummyA[i][j]);
+			matrixPrintf("%f ", dummyA[i][j]);
 		}
-		//printf("\n");
+		matrixPrintf("\n");
 	}
 	for(j=0; j<yoko; j++){
 		for(i=0; i<tate; i++){
@@ -186,7 +185,11 @@ void initializeMatrix(){
 		}
 	}
 
-	if(gSpec.proMode!=3&&gSpec.proMode!=4){
+	if(gSpec.proMode==5){
+		for(i=0; i<NUM_STA*2; i++){
+			u[i] = 0;
+		}
+	}else if(gSpec.proMode!=3&&gSpec.proMode!=4){
 		for(i=0; i<NUM_STA*2; i++){
 			u[i] = -100/(2*NUM_STA);
 		}
@@ -196,10 +199,10 @@ void initializeMatrix(){
 				u[i] = -100/(2*NUM_STA);
 			}else if(i<NUM_STA*2-gSpec.delaySTA){
 				u[i] = -100/(2*NUM_STA) + gSpec.giveU;
-				printf("%f\n", u[i]);
+				matrixPrintf("%f\n", u[i]);
 			}else{
 				u[i] = -100/(2*NUM_STA) - gSpec.giveU*(NUM_STA-gSpec.delaySTA)/gSpec.delaySTA;
-				printf("%f\n", u[i]);
+				matrixPrintf("%f\n", u[i]);
 			}
 		}
 	}
@@ -225,7 +228,7 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 	initializeDoubleArray(proTempDown, NUM_STA+1, 0);
 
 	//下り通信を受信する端末の決定
-	//printf("***** Probability that each node is selected as a destination node of AP. *****\n");
+	selectionPrintf("***** Probability that each node is selected as a destination node of AP. *****\n");
 	for(i=0; i<NUM_STA+1; i++){
 		if(i!=0){
 			proTempDown[i] += proTempDown[i-1];
@@ -234,7 +237,7 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 			proDown[i] += pro[i][j];
 		}
 		proTempDown[i] += proDown[i];
-		//printf("p_d[%d] is %f.\n", i, proTempDown[i]);
+		selectionPrintf("p_d[%d] is %f.\n", i, proTempDown[i]);
 	}
 
 	if(proTempDown[NUM_STA]<=0.999 || 1.001<=proTempDown[NUM_STA]){
@@ -242,19 +245,19 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 	}
 
 	downRand = (double)rand() / RAND_MAX;
-	//printf("downRand is %f\n", downRand);
+	selectionPrintf("downRand is %f\n", downRand);
 	for(i=0; i<=NUM_STA; i++){
 		if(i==0){
 			if(downRand<=proTempDown[i]){
 				*downNode = i;
-				//printf("Dummy STA is selected as a destination node.\n");
+				selectionPrintf("Dummy STA is selected as a destination node.\n");
 				*fNoDownlink = true;
 				break;
 			}
 		}else if(proTempDown[i-1]<downRand && downRand<=proTempDown[i]){
 			*downNode = i;
 			sta[i-1].fRx = true;
-			//printf("STA %d is selected as a destination node.\n", i-1);
+			selectionPrintf("STA %d is selected as a destination node.\n", i-1);
 			break;
 		}
 		if(i==NUM_STA){
@@ -265,20 +268,20 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 	}
 
 	//上り通信端末の選択
-	//printf("***** Probabiliy that each node is selected as a source node of AP. *****\n");
+	selectionPrintf("***** Probabiliy that each node is selected as a source node of AP. *****\n");
 	for(j=0; j<NUM_STA+1; j++){
 		if(*downNode==j){
 			proUp[j] = 0;
 		}else{
 			proUp[j] = pro[*downNode][j]/proDown[*downNode];
 			//if(proUp[j]<0.000001){
-				//printf("%f, %f ", pro[*downNode][j], proDown[*downNode]);
+				selectionPrintf("%f, %f ", pro[*downNode][j], proDown[*downNode]);
 			//}*/
 		}
-		//printf("p_u[%d] is %f\n", j, proUp[j]);
+		selectionPrintf("p_u[%d] is %f\n", j, proUp[j]);
 	}
-	//printf("\n\n");
-	//int temp = 0;
+	selectionPrintf("\n\n");
+	int temp = 0;
 	for(i=0; i<NUM_STA+1; i++){
 		if(proUp[i]!=0){
 			if(i==0){
@@ -286,16 +289,16 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 			}else{
 				sta[i-1].cw = (int)(1/proUp[i]);
 				sta[i-1].backoffCount = rand() % (sta[i-1].cw+1);
-				//printf("%f, %d ", proUp[i], sta[i-1].backoffCount);
-				//temp++;
+				selectionPrintf("%f, %d ", proUp[i], sta[i-1].backoffCount);
+				temp++;
 			}
 		}
 		if(i!=0){
-			//printf("%d, ", sta[i-1].cw);
+			selectionPrintf("%d, ", sta[i-1].cw);
 		}
 	}
-	//printf("%d, ", temp);
-	//printf("\n\n");
+	selectionPrintf("%d, ", temp);
+	selectionPrintf("\n\n");
 
 	for(i=0; i<gSpec.numSta; i++){
 		if(proUp[i+1]!=0){
@@ -304,9 +307,9 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 			}
 		}
 	}
-	//printf("%d, ", minBackoff);
+	selectionPrintf("%d, ", minBackoff);
 	if(minBackoff==INT_MAX){
-		//printf("All STAs don't have a frame.\n");   //フレームが無いときだけじゃないかも ダミーが選ばれる場合も
+		printf("All STAs don't have a frame.\n");   //フレームが無いときだけじゃないかも ダミーが選ばれる場合も
 	}
 	if(dummyNode<minBackoff){
 		minBackoff = dummyNode;
@@ -320,7 +323,7 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 					//sta[i].backoffCount = rand() % (sta[i].cw + 1);
 					numTx++;
 					*upNode = i+1;
-					//printf("STA %d has minimum backoff count.\n", i);
+					selectionPrintf("STA %d has minimum backoff count.\n", i);
 				}else{
 					//sta[i].backoffCount -= minBackoff;
 					sta[i].fTx = false;
@@ -330,7 +333,7 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 			sta[i].fTx = false;
 		}
 	}
-	//printf("%d, ", numTx);
+	selectionPrintf("%d, ", numTx);
 	if(numTx==0 && *fNoUplink==false){
 		printf("undefined\n");
 	}else if(numTx==1){
@@ -338,7 +341,7 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 	}else{
 		*fUpColl = true;
 	}
-	//printf("(%d, %d),", *downNode, *upNode);
+	selectionPrintf("(%d, %d),", *downNode, *upNode);
 
 	free(proUp);
 	free(proDown);

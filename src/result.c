@@ -32,7 +32,7 @@ void simulationResult(staInfo sta[], apInfo *ap, resultInfo *result, int trialID
 		rDelay += sta[i].sumDelay / sta[i].numSuccFrame;
 	}
 
-	printf("%ld, %ld, %ld\n\n", rNumFrameTx, rNumFrameSucc, rNumFrameColl);
+	//printf("%ld, %ld, %ld\n\n", rNumFrameTx, rNumFrameSucc, rNumFrameColl);
 
 	/*if(rNumFrameSucc!=rNumPrimFrame){
 		printf("Somthing is wrong.\n", rNumFrameTx, rNumFrameSucc);
@@ -43,16 +43,16 @@ void simulationResult(staInfo sta[], apInfo *ap, resultInfo *result, int trialID
 
 	//printf("%f, %f\n", rDelay, ap->sumDelay);
 	//printf("\n");
-	for(i=0; i<NUM_STA; i++){
+	/*for(i=0; i<NUM_STA; i++){
 		tempColl += (double)sta[i].numCollFrame / sta[i].numTxFrame;
 		printf("%ld, ", sta[i].numTxFrame);
 		//printf("%f, ", (double)sta[i].numCollFrame / sta[i].numTxFrame);
 	}
-	printf("\n\n");
-	for(i=0; i<NUM_STA; i++){
-		printf("%f, ", sta[i].sumDelay / sta[i].numSuccFrame);
+	printf("\n\n");*/
+	/*for(i=0; i<NUM_STA; i++){
+		printf("%f\n", sta[i].sumDelay / sta[i].numSuccFrame/1000);//ms
 	}
-	printf("\n");
+	printf("\n");*/
 	result->aveStaThroughput += (double)rByteFrameSucc * 8 / gElapsedTime / gSpec.numSta;
 	result->apThroughput += (double)ap->byteSuccFrame * 8 / gElapsedTime;
 	result->aveThroughput += (double)(rByteFrameSucc + ap->byteSuccFrame) * 8 /gElapsedTime;

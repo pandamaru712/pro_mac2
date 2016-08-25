@@ -70,6 +70,7 @@ typedef struct specification{
 	double delayPower;
 	double giveU;
 	int delaySTA;
+	int seed;
 }simSpec;
 
 void simSetting(int, char**);

@@ -121,7 +121,7 @@ void initializeNodeInfo(staInfo sta[], apInfo* ap){
 			sta[i].x = tempX;
 			sta[i].y = tempY;
 		}
-		printf("%f, %f\n", sta[i].x, sta[i].y);
+		positionPrintf("%f, %f\n", sta[i].x, sta[i].y);
 		sta[i].distanceAp = sqrt(pow(sta[i].x, 2)+pow(sta[i].y, 2));
 		sta[i].txPower = 20.0;   //dBm
 		sta[i].antennaGain = 2.0;   //dBi

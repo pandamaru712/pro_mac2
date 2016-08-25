@@ -28,6 +28,7 @@ static struct option options[] = {
 	{"power", required_argument, NULL, 'w'},
 	{"give", required_argument, NULL, 'g'},
 	{"dnode", required_argument, NULL, 'e'},
+	{"seed", required_argument, NULL, 'c'},
 	{0, 0, 0, 0}
 };
 
@@ -59,7 +60,7 @@ void simSetting(int argc, char **argv){
 	timer = time(NULL);
 	local = localtime(&timer);
 
-	while((opt = getopt_long(argc, argv, "hdfos:n:t:l:r:m:a:u:b:p:x:w:g:e:", options, &index)) != -1){
+	while((opt = getopt_long(argc, argv, "hdfos:n:t:l:r:m:a:u:b:p:x:w:g:e:c:", options, &index)) != -1){
 		switch(opt){
 			case 'h':
 				printf(
@@ -88,8 +89,10 @@ void simSetting(int argc, char **argv){
 					"      2: delay is used to subject.\n"
 					"      3: 0 + giveU.\n"
 					"      4: 1 + giveU.\n"
+					"      5: Max rate.\n"
 					"   -g, --give: Give probability to priority nodes.\n"
 					"   -e, --dnode: Number of STAs which require short delay.\n"
+					"   -c, --seed: Seed of \"rand\" function.\n"
 				);
 				exit(1);
 				break;
@@ -149,7 +152,10 @@ void simSetting(int argc, char **argv){
 				}
 				break;
 			case 'e':
-				gSpec.delaySTA = atof(optarg);
+				gSpec.delaySTA = atoi(optarg);
+				break;
+			case 'c':
+				gSpec.seed = atoi(optarg);
 				break;
 			default:
 				printf("Illegal options! \'%c\' \'%c\'\n", opt, optopt);
