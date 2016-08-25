@@ -21,7 +21,7 @@ static struct option options[] = {
 	{"trial", required_argument, NULL, 'r'},
 	{"lambdaSta", required_argument, NULL, 'm'},
 	{"delay", required_argument, NULL, 'a'},
-	{"output",required_argument, NULL, 'u'},
+	{"output",no_argument, NULL, 'u'},
 	{"area", required_argument, NULL, 'b'},
 	{"opt", required_argument, NULL, 'p'},
 	{"position", required_argument, NULL, 'x'},
@@ -35,6 +35,9 @@ static struct option options[] = {
 void simSetting(int argc, char **argv){
 	int opt;
 	int index;
+	char name[256] = {'\0'};
+   time_t timer;
+   struct tm *timeptr;
 
 	gSpec.fDebug = false;
 	gSpec.simTime = 1;   //sec
@@ -55,12 +58,7 @@ void simSetting(int argc, char **argv){
 	gSpec.delaySTA = 5;
 	memset(gSpec.filename, '\0', strlen(gSpec.filename));
 
-	time_t timer;
-	struct tm *local;
-	timer = time(NULL);
-	local = localtime(&timer);
-
-	while((opt = getopt_long(argc, argv, "hdfos:n:t:l:r:m:a:u:b:p:x:w:g:e:c:", options, &index)) != -1){
+	while((opt = getopt_long(argc, argv, "hdfos:n:t:l:r:m:a:ub:p:x:w:g:e:c:", options, &index)) != -1){
 		switch(opt){
 			case 'h':
 				printf(
@@ -127,10 +125,11 @@ void simSetting(int argc, char **argv){
 				gSpec.delayMode = atoi(optarg);
 				break;
 			case 'u':
-				if(optarg!=NULL){
-					gSpec.fOutput = true;
-					sprintf(gSpec.filename, "data/%s.txt", optarg);
-				}
+				gSpec.fOutput = true;
+				timer = time(NULL);
+    			timeptr = localtime(&timer);
+    			strftime(name, 256, "%m-%d-%H-%M-%S", timeptr);
+				sprintf(gSpec.filename, "data/%s.txt", name);
 				break;
 			case 'b':
 				gSpec.areaSize = atoi(optarg);
@@ -222,7 +221,7 @@ void simSetting(int argc, char **argv){
 	}
 
 	if(gSpec.fOutput==true){
-		fprintf(gSpec.output, "Simulation ran at %02d/%02d/%02d_%02d:%02d:%02d.\n", local->tm_year-100, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
+		fprintf(gSpec.output, "Simulation ran at %02d/%02d/%02d_%02d:%02d:%02d.\n", timeptr->tm_year-100, timeptr->tm_mon + 1, timeptr->tm_mday, timeptr->tm_hour, timeptr->tm_min, timeptr->tm_sec);
 		fprintf(gSpec.output, "-----Settings-----\n");
 		if(gSpec.fDebug==true){
 			fprintf(gSpec.output, "   Debug mode.\n");
@@ -247,8 +246,31 @@ void simSetting(int argc, char **argv){
 			fprintf(gSpec.output, "   Traffic pattern is 1500/500.\n");
 			fprintf(gSpec.output, "   Offered load of STA is %f Mbit/s.\n", gSpec.lambdaSta*500*8);
 		}
+		fprintf(gSpec.output, "   Area size is %d m.\n", gSpec.areaSize);
 		fprintf(gSpec.output, "   Delay Mode is %d.\n", gSpec.delayMode);
-		fprintf(gSpec.output, "   Output to %s.\n", gSpec.filename);
+		if(gSpec.fOutput==false){
+			fprintf(gSpec.output, "   No output files.\n");
+		}else{
+			fprintf(gSpec.output, "   Output to %s.\n", gSpec.filename);
+		}
+		fprintf(gSpec.output, "   PRO_MODE is %d.\n", gSpec.proMode);
+		if(gSpec.proMode==3||gSpec.proMode==4){
+			fprintf(gSpec.output, "   giveU is %f.\n", gSpec.giveU);
+			fprintf(gSpec.output, "   delaySTA is %d.\n", gSpec.delaySTA);
+		}
+		if(gSpec.position==0){
+			fprintf(gSpec.output, "   AP is (0, 0) and STAs are deployed concentrically.\n");
+		}else if(gSpec.position==1){
+			fprintf(gSpec.output, "   AP is (0, 0) and STAs are randomly deployed.\n");
+		}else if(gSpec.position==2){
+			fprintf(gSpec.output, "   AP and STAs are randomly deployed.\n");
+		}else if(gSpec.position==3){
+			fprintf(gSpec.output, "   AP is (0,0) and STAs are deployed with topology.txt\n");
+		}else{
+			fprintf(gSpec.output, "   Position option is failed.\n");
+			exit(1);
+		}
+		fprintf(gSpec.output, "   delayPower is %f.\n", gSpec.delayPower);
 		fprintf(gSpec.output, "------------------\n");
 	}
 
