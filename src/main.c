@@ -80,7 +80,7 @@ int main(int argc, char *argv[]){
 	printf("Open MATLAB engine.\n");
 
 	for (trialID=0; trialID<gSpec.numTrial; trialID++){
-		printf("\n***** No. %d *****\n", trialID);
+		printf("\n***** %d/%d *****\n", trialID+1, gSpec.numTrial);
 		srand(9);
 		numTx = 0;
 		fEmpty = false;
@@ -89,20 +89,25 @@ int main(int argc, char *argv[]){
 		gElapsedTime = gStd.difs;
 		initializeMatrix();
 		printf("Initialization NodeInfo and Matrix.\n");
-		calculateProbability(sta, &ap);
+		if(gSpec.proMode!=6 && gSpec.proMode!=7){
+			calculateProbability(sta, &ap);
+		}
 		previousCount = 0;
-		printf("                     :   0%%");
+		#ifdef PROGRESS
+			printf("                     :   0%%");
+		#endif
 		for( ;gElapsedTime<gSpec.simTime*1000000; ){
 			transmission(sta, &ap);
 
 			if(lastBeacon+100000<gElapsedTime){
-				if(gSpec.proMode!=0 && gSpec.proMode!=3 && gSpec.proMode!=5){
+				if(gSpec.proMode!=0 && gSpec.proMode!=3 && gSpec.proMode!=5 && gSpec.proMode!=6 && gSpec.proMode!=7){
 					calculateProbability(sta, &ap);
 				}
 				lastBeacon = gElapsedTime;
 			}
+			printf("%f\n", gElapsedTime);
 			#ifdef PROGRESS
-			showProgression(&previousCount);
+				showProgression(&previousCount);
 			#endif
 		}
 

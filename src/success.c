@@ -19,7 +19,7 @@ int timeFrameLength(int byteLength, double dataRate){
 	timeLength = gStd.phyHeader + 4 * ((gStd.macService + 8* (gStd.macHeader + byteLength + gStd.macFcs) + gStd.macTail + (4 * dataRate - 1)) / (4 * dataRate));
 	//printf("%f, %d\n", dataRate, timeLength);
 
-	//printf("%d\n", timeLength);
+	printf("%d\n", timeLength);
 
 	return timeLength;
 }
@@ -101,6 +101,12 @@ void transmission(staInfo sta[], apInfo *ap){
 		//txTimeFrameLength = gStd.phyHeader + 4 * ((gStd.macService + 8* (gStd.macHeader + txFrameLength + gStd.macFcs) + gStd.macTail + (4 * gStd.dataRate - 1)) / (4 * gStd.dataRate));
 		if(apLength==0&&staLength==0){
 			printf("Frame length error.\n");
+		}else if(gSpec.proMode==6 || gSpec.proMode==7){
+			if(apLength<=staLength){
+				totalTime = staLength + gStd.sifs + gStd.timeAck;
+			}else{
+				totalTime = apLength + gStd.sifs + gStd.timeAck;
+			}
 		}else if(apLength<=staLength){
 			totalTime = (double)minBackoff * gStd.slot + staLength + gStd.sifs + gStd.timeAck;
 		}else{
@@ -157,6 +163,12 @@ void transmission(staInfo sta[], apInfo *ap){
 		//printf("%d\n", staLength);
 		if(apLength==0&&staLength==0){
 			printf("Frame length error.\n");
+		}else if(gSpec.proMode==6 || gSpec.proMode ==7){
+			if(apLength<=staLength){
+				totalTime = staLength + gStd.sifs + gStd.timeAck;
+			}else{
+				totalTime = apLength + gStd.sifs + gStd.timeAck;
+			}
 		}else if(apLength<=staLength){
 			totalTime = (double)minBackoff * gStd.slot + staLength + gStd.sifs + gStd.timeAck;
 		}else{

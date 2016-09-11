@@ -221,11 +221,66 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 	int numTx = 0;
 	int minBackoff = INT_MAX;
 	int dummyNode = INT_MAX;
+	int nodeIdRandom;
 
 	//配列の初期化
 	initializeDoubleArray(proDown, NUM_STA+1, 0);
 	initializeDoubleArray(proUp, NUM_STA+1, 0);
 	initializeDoubleArray(proTempDown, NUM_STA+1, 0);
+
+	if(gSpec.proMode==7){
+		nodeIdRandom = rand() % (NUM_STA + 1);
+		if(nodeIdRandom==0){
+			*upNode = 0;
+			*fNoUplink = true;
+			nodeIdRandom = rand() % NUM_STA;
+			for(i=0; i<NUM_STA; i++){
+				if(i==nodeIdRandom){
+					*downNode = i + 1;
+					sta[i].fTx = false;
+					sta[i].fRx = true;
+				}else{
+					sta[i].fTx = false;
+					sta[i].fRx = false;
+				}
+			}
+		}else{
+			*downNode = 0;
+			*fNoDownlink = true;
+			for(i=0; i<NUM_STA; i++){
+				if(i==nodeIdRandom-1){
+					sta[i].fTx = true;
+					sta[i].fRx = false;
+					*upNode = nodeIdRandom;
+					numTx++;
+				}else{
+					sta[i].fTx = false;
+					sta[i].fRx = false;
+				}
+			}
+		}
+		goto ENDHALF;
+	}
+
+	if(gSpec.proMode==6){
+		nodeIdRandom = rand() % (NUM_STA+1);
+		for(i=1; i<=NUM_STA; i++){
+			if(nodeIdRandom==0){
+				*downNode = 0;
+				selectionPrintf("Dummy STA is selected as a destination node.\n");
+				*fNoDownlink = true;
+				break;
+			}
+			if(i==nodeIdRandom){
+				*downNode = i;
+				sta[i-1].fRx = true;
+				selectionPrintf("STA %d is selected as a destination node.\n", i-1);
+			}else{
+				sta[i-1].fRx = false;
+			}
+		}
+		goto HALF;
+	}
 
 	//下り通信を受信する端末の決定
 	selectionPrintf("***** Probability that each node is selected as a destination node of AP. *****\n");
@@ -265,6 +320,30 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 			*downNode = 0;
 			*fNoDownlink = true;
 		}
+	}
+
+	HALF:
+	if(gSpec.proMode==6){
+		do{
+			nodeIdRandom = rand() % (NUM_STA+1);
+		}while(nodeIdRandom==*downNode);
+		for(i=1; i<=NUM_STA; i++){
+			if(nodeIdRandom==0){
+				*upNode = 0;
+				selectionPrintf("Dummy STA is selected as a source node.\n");
+				*fNoUplink = true;
+				break;
+			}
+			if(i==nodeIdRandom){
+				*upNode = i;
+				sta[i-1].fTx = true;
+				selectionPrintf("STA %d is selected as a source node.\n", i-1);
+				numTx++;
+			}else{
+				sta[i-1].fTx = false;
+			}
+		}
+		goto ENDHALF;
 	}
 
 	//上り通信端末の選択
@@ -334,6 +413,8 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 		}
 	}
 	selectionPrintf("%d, ", numTx);
+
+	ENDHALF:
 	if(numTx==0 && *fNoUplink==false){
 		printf("undefined\n");
 	}else if(numTx==1){

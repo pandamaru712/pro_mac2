@@ -88,6 +88,7 @@ void simSetting(int argc, char **argv){
 					"      3: 0 + giveU.\n"
 					"      4: 1 + giveU.\n"
 					"      5: Max rate.\n"
+					"      6: Random.\n"
 					"   -g, --give: Give probability to priority nodes.\n"
 					"   -e, --dnode: Number of STAs which require short delay.\n"
 					"   -c, --seed: Seed of \"rand\" function.\n"
@@ -191,7 +192,7 @@ void simSetting(int argc, char **argv){
 	if(gSpec.fOutput==false){
 		printf("   No output files.\n");
 	}else{
-		printf("   Output to %s.\n", gSpec.filename);
+		printf("   Output to ./%s.\n", gSpec.filename);
 	}
 	printf("   PRO_MODE is %d.\n", gSpec.proMode);
 	if(gSpec.proMode==3||gSpec.proMode==4){
@@ -251,7 +252,7 @@ void simSetting(int argc, char **argv){
 		if(gSpec.fOutput==false){
 			fprintf(gSpec.output, "   No output files.\n");
 		}else{
-			fprintf(gSpec.output, "   Output to %s.\n", gSpec.filename);
+			fprintf(gSpec.output, "   Output to ./%s.\n", gSpec.filename);
 		}
 		fprintf(gSpec.output, "   PRO_MODE is %d.\n", gSpec.proMode);
 		if(gSpec.proMode==3||gSpec.proMode==4){

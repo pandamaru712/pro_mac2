@@ -267,7 +267,7 @@ void calculatePhyRate(apInfo *ap, staInfo sta[], int *upNode, int *downNode){
 			sinr = mw2dbm(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ICI)));
 			ap->dataRate = shannon(dbm2mw(sinr));
 		}
-		//printf("%f\n", ap->dataRate);
-		//printf("sta %d, %f\n", *upNode-1, sta[*upNode-1].dataRate);
+		printf("%f\n", ap->dataRate);
+		printf("sta %d, %f\n", *upNode-1, sta[*upNode-1].dataRate);
 	}
 }

@@ -5,7 +5,7 @@
 //#define SHOW_OPTIMIZATION
 //#define SHOW_PROBABILITY
 //#define SHOW_RATE
-//#define SHOW_SELECTION
+#define SHOW_SELECTION
 //#define SHOW_MATRIX
 //#define SHOW_POSITION
 
