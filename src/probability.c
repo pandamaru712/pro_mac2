@@ -208,7 +208,7 @@ void initializeMatrix(){
 	}
 }
 
-int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink, int *upNode, int *downNode){
+int selectNode(apInfo *ap, staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink, int *upNode, int *downNode){
 	double *proDown;
 	proDown = (double*)malloc(sizeof(double)*(NUM_STA+1));// = {};
 	double *proUp;
@@ -332,6 +332,7 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 				*upNode = 0;
 				selectionPrintf("Dummy STA is selected as a source node.\n");
 				*fNoUplink = true;
+				calculatePhyRate(ap, sta, upNode, downNode);
 				break;
 			}
 			if(i==nodeIdRandom){
@@ -339,6 +340,7 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 				sta[i-1].fTx = true;
 				selectionPrintf("STA %d is selected as a source node.\n", i-1);
 				numTx++;
+				calculatePhyRate(ap, sta, upNode, downNode);
 			}else{
 				sta[i-1].fTx = false;
 			}
@@ -379,7 +381,12 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 	selectionPrintf("%d, ", temp);
 	selectionPrintf("\n\n");
 
+	bool empty = true;
+
 	for(i=0; i<gSpec.numSta; i++){
+		if(sta[i].buffer[0].lengthMsdu!=0){
+			empty = false;
+		}
 		if(proUp[i+1]!=0){
 			if((minBackoff>sta[i].backoffCount)&&(sta[i].buffer[0].lengthMsdu!=0)){
 				minBackoff = sta[i].backoffCount;
@@ -387,13 +394,14 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 		}
 	}
 	selectionPrintf("%d, ", minBackoff);
-	if(minBackoff==INT_MAX){
+	if(minBackoff==INT_MAX&&empty==true){
 		printf("All STAs don't have a frame.\n");   //フレームが無いときだけじゃないかも ダミーが選ばれる場合も
 	}
 	if(dummyNode<minBackoff){
 		minBackoff = dummyNode;
 		*fNoUplink = true;
 		*upNode = 0;
+		calculatePhyRate(ap, sta, upNode, downNode);
 	}else{
 		if(*fNoUplink==false){
 			for(i=0; i<gSpec.numSta; i++){
@@ -402,6 +410,7 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 					//sta[i].backoffCount = rand() % (sta[i].cw + 1);
 					numTx++;
 					*upNode = i+1;
+					calculatePhyRate(ap, sta, upNode, downNode);
 					selectionPrintf("STA %d has minimum backoff count.\n", i);
 				}else{
 					//sta[i].backoffCount -= minBackoff;
@@ -417,12 +426,19 @@ int selectNode(staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *fNoDownlink,
 	ENDHALF:
 	if(numTx==0 && *fNoUplink==false){
 		printf("undefined\n");
+	}else if(numTx==0 && *fNoUplink==true){
+		*fUpColl = false;
 	}else if(numTx==1){
 		*fUpColl = false;
 	}else{
 		*fUpColl = true;
+		printf("\ncollision\n");
 	}
 	selectionPrintf("(%d, %d),", *downNode, *upNode);
+
+	if(numTx==1){
+		printf("\n(%d, %d),\n", *downNode, *upNode);
+	}
 
 	free(proUp);
 	free(proDown);

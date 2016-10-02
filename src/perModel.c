@@ -11,6 +11,8 @@ extern double u[NUM_STA*2];
 extern double gElapsedTime;
 extern std11 gStd;
 
+double sellectPhyRate(double);
+
 double distance(apInfo *ap, staInfo sta[], int down, int up){
 	double distance = 0;
 	//down, upはダミー含めてののsta番号
@@ -41,7 +43,7 @@ double dbm2mw(double dbm){
 
 double shannon(double sinr){
 	double capacity;
-	capacity = 20 * log2(1+sinr);
+	capacity = gSpec.bandWidth * log2(1+sinr);
 	return capacity;
 }
 
@@ -69,7 +71,9 @@ void calculateRSSI(apInfo *ap, staInfo sta[], double delay[]){
 			}else if(j==0 && i!=0){   //下りのみ
 				rssi = ap->txPower + ap->antennaGain + sta[i-1].antennaGain - (30*log10(distance(ap, sta, i, 0)) + 47);
 				snr = rssi - gSpec.noise;// pow(10,(rssi)/10)/(pow(10,(gSpec.noise)/10)+pow(10,(gSpec.ICI)/10));
-				if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5){
+				if(snr<9.63){
+					r_mat[i][j] = 0;
+				}else if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5){
 					r_mat[i][j] = shannon(dbm2mw(snr));//downlink = 20*log2(1+snr);
 				}else if(gSpec.proMode==1||gSpec.proMode==4){
 					r_mat[i][j] = shannon(dbm2mw(snr)) * pow(delay[j], gSpec.delayPower);
@@ -78,7 +82,9 @@ void calculateRSSI(apInfo *ap, staInfo sta[], double delay[]){
 			}else if(j!=0 && i==0){   //上りのみ
 				rssi = sta[j-1].txPower + sta[j-1].antennaGain + ap->antennaGain - (30*log10(distance(ap, sta, 0, j)) + 47);
 				snr = rssi - gSpec.noise;
-				if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5){
+				if(snr<9.63){
+					r_mat[i][j] = 0;
+				}else if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5){
 					r_mat[i][j] = shannon(dbm2mw(snr));
 				}else if(gSpec.proMode==1||gSpec.proMode==4){
 					r_mat[i][j] = shannon(dbm2mw(snr)) * pow(delay[j], gSpec.delayPower);
@@ -87,18 +93,23 @@ void calculateRSSI(apInfo *ap, staInfo sta[], double delay[]){
 				//printf("%f\n", sta[*upNode-1].dataRate);
 			}else{
 				rssi = ap->txPower + ap->antennaGain + sta[i-1].antennaGain - (30*log10(distance(ap, sta, i, 0)) + 47);
-				snr = rssi - gSpec.noise;
-				if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5){
-					downlink = shannon(dbm2mw(snr - gSpec.ICIth));
+				snr = rssi - gSpec.noise - gSpec.ICIth;
+				if(snr<9.63){
+					downlink = 0;
+				}else if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5){
+					downlink = shannon(dbm2mw(snr));
 				}else if(gSpec.proMode==1||gSpec.proMode==4){
-					downlink = shannon(dbm2mw(snr - gSpec.ICIth));// * delay[0] / 10000;
+					downlink = shannon(dbm2mw(snr));// * delay[0] / 10000;
 				}
 				ICI = sta[j-1].txPower + sta[j-1].antennaGain + sta[i-1].antennaGain - (30*log10(distance(ap, sta, i, j)) + 47);
 				sinr = mw2dbm(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ICI)));
 				//printf("%f, %f, %f, %f\n", rssi, ICI, snr, sinr);
-				if(sinr>=snr-5){
+				if(sinr>=snr){
 					rssi = sta[j-1].txPower + sta[j-1].antennaGain + ap->antennaGain - (30*log10(distance(ap, sta, 0, j)) + 47);
-					if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5){
+					sinr = mw2dbm(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC)));
+					if(sinr<9.63){
+						uplink = 0;
+					}else if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5){
 						uplink = shannon(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC)));
 					}else if(gSpec.proMode==1||gSpec.proMode==4){
 						uplink = shannon(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC)));// * delay[j] / 10000;
@@ -111,14 +122,19 @@ void calculateRSSI(apInfo *ap, staInfo sta[], double delay[]){
 						printf("ICI Error\n");
 					}
 					rssi = txPower + sta[j-1].antennaGain + ap->antennaGain - 30*log10(distance(ap, sta, 0, j)) - 47;
-					if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5){
+					sinr = mw2dbm(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC)));
+					if(sinr<9.63){
+						uplink = 0;
+					}else if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5){
 						uplink = shannon(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC)));
 					}else if(gSpec.proMode==1||gSpec.proMode==4){
 						uplink = shannon(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC)));// * delay[j] / 10000;
 					}
 					//printf("%f\n", txPower);
 				}
-				if(gSpec.proMode==1||gSpec.proMode==4){
+				if(downlink==0||uplink==0){
+					r_mat[i][j] = 0;
+				}else if(gSpec.proMode==1||gSpec.proMode==4){
 					r_mat[i][j] = (downlink + uplink) * pow(delay[j], gSpec.delayPower);
 				}else{
 					r_mat[i][j] = downlink + uplink;
@@ -228,13 +244,13 @@ void calculatePhyRate(apInfo *ap, staInfo sta[], int *upNode, int *downNode){
 		//printf("down half\n");
 		rssi = ap->txPower + ap->antennaGain + sta[*downNode-1].antennaGain - (30*log10(distance(ap, sta, *downNode, 0)) + 47);
 		snr = rssi - gSpec.noise;// pow(10,(rssi)/10)/(pow(10,(gSpec.noise)/10)+pow(10,(gSpec.ICI)/10));
-		ap->dataRate = shannon(dbm2mw(snr));//downlink = 20*log2(1+snr);
+		ap->dataRate = sellectPhyRate(snr);//shannon(dbm2mw(snr));//downlink = 20*log2(1+snr);
 		//printf("%f\n", ap->dataRate);
 	}else if(*upNode!=0 && *downNode==0){
 		//printf("up half\n");
 		rssi = sta[*upNode-1].txPower + sta[*upNode-1].antennaGain + ap->antennaGain - (30*log10(distance(ap, sta, 0, *upNode)) + 47);
 		snr = rssi - gSpec.noise;
-		sta[*upNode-1].dataRate = shannon(dbm2mw(snr));
+		sta[*upNode-1].dataRate = sellectPhyRate(snr);//shannon(dbm2mw(snr));
 		//printf("%f\n", sta[*upNode-1].dataRate);
 	}else if(*upNode==0 && *downNode==0){
 		printf("Error 876\n");
@@ -246,9 +262,9 @@ void calculatePhyRate(apInfo *ap, staInfo sta[], int *upNode, int *downNode){
 		sinr = mw2dbm(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ICI)));
 		//printf("%f, %f, %f, %f\n", rssi, ICI, snr, sinr);
 		if(sinr>=snr-5){
-			ap->dataRate = shannon(dbm2mw(sinr));
+			ap->dataRate = sellectPhyRate(sinr);//shannon(dbm2mw(sinr));
 			rssi = sta[*upNode-1].txPower + sta[*upNode-1].antennaGain + ap->antennaGain - (30*log10(distance(ap, sta, 0, *upNode)) + 47);
-			sta[*upNode-1].dataRate = shannon(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC)));
+			sta[*upNode-1].dataRate = sellectPhyRate(mw2dbm(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC))));
 			/*if(sta[*upNode].dataRate<6){
 				sta[*upNode].dataRate = 6;
 			}*/
@@ -260,14 +276,55 @@ void calculatePhyRate(apInfo *ap, staInfo sta[], int *upNode, int *downNode){
 				printf("ICI Error\n");
 			}
 			rssi = txPower + sta[*upNode-1].antennaGain + ap->antennaGain - 30*log10(distance(ap, sta, 0, *upNode)) - 47;
-			sta[*upNode-1].dataRate = shannon(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC)));
+			sinr = dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC));
+			if(sinr<9.63){
+				printf("sinr=%f\n", sinr);
+			}
+			sta[*upNode-1].dataRate = sellectPhyRate(mw2dbm(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC))));
 			/*if(sta[*upNode].dataRate<6){
 				sta[*upNode].dataRate = 6;
 			}*/
+			rssi = ap->txPower + ap->antennaGain + sta[*downNode-1].antennaGain - (30*log10(distance(ap, sta, *downNode, 0)) + 47);
 			sinr = mw2dbm(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ICI)));
-			ap->dataRate = shannon(dbm2mw(sinr));
+			ap->dataRate = sellectPhyRate(sinr);//shannon(dbm2mw(sinr));
 		}
-		printf("%f\n", ap->dataRate);
-		printf("sta %d, %f\n", *upNode-1, sta[*upNode-1].dataRate);
 	}
+	if(*downNode!=0){
+		printf("AP's data rate: %f\n", ap->dataRate);
+	}
+	if(*upNode!=0){
+		printf("sta %d's data rate: %f\n", *upNode-1, sta[*upNode-1].dataRate);
+	}
+}
+
+double sellectPhyRate(double snr){
+	double phyRate;
+
+	if(gSpec.rateMode==0){
+		phyRate = shannon(dbm2mw(snr));
+	}else{
+		if(snr<9.63){
+			phyRate = 6;
+			printf("Phy rate is 0 Mbit/s\n");
+			//exit(17);
+		}else if(snr<10.63){
+			phyRate = 6;
+		}else if(snr<12.63){
+			phyRate = 9;
+		}else if(snr<14.63){
+			phyRate = 12;
+		}else if(snr<17.63){
+			phyRate = 18;
+		}else if(snr<21.63){
+			phyRate = 24;
+		}else if(snr<25.63){
+			phyRate = 36;
+		}else if(snr<26.63){
+			phyRate = 48;
+		}else{
+			phyRate = 54;
+		}
+	}
+
+	return phyRate;
 }

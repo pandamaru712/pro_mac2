@@ -5,7 +5,7 @@
 //#define SHOW_OPTIMIZATION
 //#define SHOW_PROBABILITY
 //#define SHOW_RATE
-#define SHOW_SELECTION
+//#define SHOW_SELECTION
 //#define SHOW_MATRIX
 //#define SHOW_POSITION
 
@@ -13,6 +13,8 @@
 #define BUFFER_SIZE 200
 #define NUM_STA 50
 #define EP_BUFFER_SIZE 2048
+#define STR_MAX 256
+#define CONFIG_FILE "config.txt"
 
 #ifdef SHOW_PROCESS
 #define processPrintf printf

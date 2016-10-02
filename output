@@ -1,0 +1,30 @@
+Simulation ran at -100/01/-1_-1:00:00.
+-----Settings-----
+   Number of STA is 50.
+   Simulation time is 10 sec.
+   Simulation runs 1 times.
+   Lambda of STA is 0.100000 /us.
+   Traffic pattern is 1500/1500.
+   Offered load of STA is 1200.000000 Mbit/s.
+   Area size is 100 m.
+   Delay Mode is 1.
+   Output to ./output.
+   PRO_MODE is 1.
+   AP is (0, 0) and STAs are randomly deployed.
+   delayPower is 1.000000.
+------------------
+Simulation ran at -100/01/-1_-1:00:00.
+-----Settings-----
+   Number of STA is 50.
+   Simulation time is 10 sec.
+   Simulation runs 1 times.
+   Lambda of STA is 0.100000 /us.
+   Traffic pattern is 1500/1500.
+   Offered load of STA is 1200.000000 Mbit/s.
+   Area size is 100 m.
+   Delay Mode is 1.
+   Output to ./output.
+   PRO_MODE is 1.
+   AP is (0, 0) and STAs are randomly deployed.
+   delayPower is 1.000000.
+------------------

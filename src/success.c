@@ -19,8 +19,11 @@ int timeFrameLength(int byteLength, double dataRate){
 	timeLength = gStd.phyHeader + 4 * ((gStd.macService + 8* (gStd.macHeader + byteLength + gStd.macFcs) + gStd.macTail + (4 * dataRate - 1)) / (4 * dataRate));
 	//printf("%f, %d\n", dataRate, timeLength);
 
-	printf("%d\n", timeLength);
-
+	//printf("%f\n", dataRate);
+	if(timeLength<0){
+		printf("Time length < 0\n");
+		exit(38);
+	}
 	return timeLength;
 }
 
@@ -41,7 +44,7 @@ void transmission(staInfo sta[], apInfo *ap){
 	//int rxSta = INT_MAX;
 	int apLength = 0;
 	int staLength = 0;
-	minBackoff = selectNode(sta, &fUpColl, &fNoUplink, &fNoDownlink, &upNode, &downNode);
+	minBackoff = selectNode(ap, sta, &fUpColl, &fNoUplink, &fNoDownlink, &upNode, &downNode);
 	//printf("%d\n", minBackoff);
 
 	gSpec.chance++;
@@ -49,10 +52,18 @@ void transmission(staInfo sta[], apInfo *ap){
 	if(fNoUplink==true && fNoDownlink==true){
 		printf("Error! (106)\n");
 	}else{
-		calculatePhyRate(ap, sta, &upNode, &downNode);
+		//calculatePhyRate(ap, sta, &upNode, &downNode);
 	}
 
 	if(fUpColl==false){
+		//ここでいいかはかなり怪しい
+		if(gSpec.proMode==6&&(sta[upNode-1].dataRate==0||ap->dataRate==0)){
+			if(upNode-1>=0){
+				sta[upNode-1].fTx = false;
+			}
+			apLength = timeFrameLength(1500, 6);
+			goto MODE6;
+		}
 		//Uplinl successed.
 		if(fNoDownlink==false){
 			ap->sumFrameLengthInBuffer -= ap->buffer[0].lengthMsdu;
@@ -98,6 +109,8 @@ void transmission(staInfo sta[], apInfo *ap){
 				}
 			}
 		}
+
+		MODE6:
 		//txTimeFrameLength = gStd.phyHeader + 4 * ((gStd.macService + 8* (gStd.macHeader + txFrameLength + gStd.macFcs) + gStd.macTail + (4 * gStd.dataRate - 1)) / (4 * gStd.dataRate));
 		if(apLength==0&&staLength==0){
 			printf("Frame length error.\n");

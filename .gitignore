@@ -31,6 +31,7 @@
 # Debug files
 *.dSYM/
 *.txt
+!config.txt
 
 *.d
 .DS_Store

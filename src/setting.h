@@ -2,6 +2,7 @@
 #define _setting_h
 
 #include <stdio.h>
+#include "macro.h"
 
 typedef enum boolean{
 	false,
@@ -55,7 +56,7 @@ typedef struct specification{
 	double lambdaSta;
 	int delayMode;
 	bool fOutput;
-	char filename[100];
+	char filename[STR_MAX];
 	int areaSize;   //m
 	FILE *output;
 	double SIC;   //Self-interference cancekation
@@ -71,6 +72,8 @@ typedef struct specification{
 	double giveU;
 	int delaySTA;
 	int seed;
+	int rateMode;
+	double bandWidth;
 }simSpec;
 
 void simSetting(int, char**);
