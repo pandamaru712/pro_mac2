@@ -8,6 +8,7 @@
 
 extern double r[(NUM_STA+1)*(NUM_STA+1)];
 extern double u[NUM_STA*2];
+extern double ub[(NUM_STA+1)*(NUM_STA+1)];
 extern double gElapsedTime;
 extern std11 gStd;
 
@@ -172,8 +173,14 @@ void calculateRSSI(apInfo *ap, staInfo sta[], double delay[]){
 	ratePrintf("\n***** Rate Matrix *****\n");
 	for(i=0;i<NUM_STA+1;i++){
 		for(j=0;j<NUM_STA+1;j++){
-			r[i*(NUM_STA+1)+j] = -r_mat[i][j];
-			ratePrintf("%f, ", r[i*(NUM_STA+1)+j]);
+			if(r_mat[i][j]!=0){
+				r[i*(NUM_STA+1)+j] = -r_mat[i][j];
+				ratePrintf("%f, ", r[i*(NUM_STA+1)+j]);
+				ub[i*(NUM_STA+1)+j] = 100;
+			}else{
+				ub[i*(NUM_STA+1)+j] = 0;
+				ratePrintf("%f, ", r[i*(NUM_STA+1)+j]);
+			}
 		}
 		ratePrintf("\n");
 	}
@@ -276,9 +283,10 @@ void calculatePhyRate(apInfo *ap, staInfo sta[], int *upNode, int *downNode){
 				printf("ICI Error\n");
 			}
 			rssi = txPower + sta[*upNode-1].antennaGain + ap->antennaGain - 30*log10(distance(ap, sta, 0, *upNode)) - 47;
-			sinr = dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC));
+			sinr = mw2dbm(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC)));
 			if(sinr<9.63){
-				printf("sinr=%f\n", sinr);
+				//printf("%f\n", r[(*downNode)*(NUM_STA+1)+*upNode]);
+				//printf("sinr=%f\n", sinr);
 			}
 			sta[*upNode-1].dataRate = sellectPhyRate(mw2dbm(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC))));
 			/*if(sta[*upNode].dataRate<6){
@@ -289,12 +297,12 @@ void calculatePhyRate(apInfo *ap, staInfo sta[], int *upNode, int *downNode){
 			ap->dataRate = sellectPhyRate(sinr);//shannon(dbm2mw(sinr));
 		}
 	}
-	if(*downNode!=0){
+	/*if(*downNode!=0){
 		printf("AP's data rate: %f\n", ap->dataRate);
 	}
 	if(*upNode!=0){
 		printf("sta %d's data rate: %f\n", *upNode-1, sta[*upNode-1].dataRate);
-	}
+	}*/
 }
 
 double sellectPhyRate(double snr){
@@ -304,9 +312,9 @@ double sellectPhyRate(double snr){
 		phyRate = shannon(dbm2mw(snr));
 	}else{
 		if(snr<9.63){
-			phyRate = 6;
+			phyRate = 0;
 			printf("Phy rate is 0 Mbit/s\n");
-			//exit(17);
+			exit(17);
 		}else if(snr<10.63){
 			phyRate = 6;
 		}else if(snr<12.63){

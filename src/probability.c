@@ -22,6 +22,7 @@ extern double dummyAeq[2][(NUM_STA+1)*(NUM_STA+1)];
 extern double Aeq[2][(NUM_STA+1)*(NUM_STA+1)];
 extern double beq[2];
 extern double lb[(NUM_STA+1)*(NUM_STA+1)];
+extern double ub[(NUM_STA+1)*(NUM_STA+1)];
 
 void solveLP(){
 	int i, j;
@@ -39,6 +40,7 @@ void solveLP(){
 	mxArray *mx_Aeq = NULL;
 	mxArray *mx_beq = NULL;
 	mxArray *mx_lb = NULL;
+	mxArray *mx_ub = NULL;
 	mx_p = mxCreateDoubleMatrix(1, yoko, mxREAL);
 	mx_fval = mxCreateDoubleMatrix(1, 1, mxREAL);
 	double *p, *fval;
@@ -55,6 +57,8 @@ void solveLP(){
 	memcpy((void *)mxGetPr(mx_beq), (void *)beq, sizeof(beq));
 	mx_lb = mxCreateDoubleMatrix(1, yoko, mxREAL);
 	memcpy((void *)mxGetPr(mx_lb), (void *)lb, sizeof(lb));
+	mx_ub = mxCreateDoubleMatrix(1, yoko, mxREAL);
+	memcpy((void *)mxGetPr(mx_ub), (void *)ub, sizeof(ub));
 
 	engPutVariable(gEp, "mx_r", mx_r);
 	engPutVariable(gEp, "mx_A", mx_A);
@@ -62,6 +66,7 @@ void solveLP(){
 	engPutVariable(gEp, "mx_Aeq", mx_Aeq);
 	engPutVariable(gEp, "mx_beq", mx_beq);
 	engPutVariable(gEp, "mx_lb", mx_lb);
+	engPutVariable(gEp, "mx_ub", mx_ub);
 
 	//engOutputBuffer(gEp, buffer, EP_BUFFER_SIZE);
 	//engEvalString(gEp, "mx_r");
@@ -69,7 +74,7 @@ void solveLP(){
 
 	optimizationPrintf("Optimization starts.\n");
 
-	engEvalString(gEp, "[p, fval] = linprog(mx_r, mx_A, mx_u, mx_Aeq, mx_beq, mx_lb, []);");
+	engEvalString(gEp, "[p, fval] = linprog(mx_r, mx_A, mx_u, mx_Aeq, mx_beq, mx_lb, mx_ub);");
 	//printf("%s", buffer);
 	engEvalString(gEp, "p = p ./ 100;");
 	engEvalString(gEp, "fval = fval / (-100);");
@@ -174,6 +179,13 @@ void initializeMatrix(){
 			dummyAeq[0][j] = 1;
 		}
 	}
+	/*printf("dummyAeq\n");
+	for(i=0; i<tate; i++){
+		for(j=0; j<yoko; j++){
+			printf("%f ", dummyAeq[i][j]);
+		}
+		printf("\n");
+	}*/
 	for(j=0; j<yoko; j++){
 		for(i=0; i<tate; i++){
 			no = tate * j + i + 1;
@@ -432,9 +444,14 @@ int selectNode(apInfo *ap, staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *
 		*fUpColl = false;
 	}else{
 		*fUpColl = true;
-		printf("\ncollision\n");
+		//printf("\ncollision\n");
 	}
 	selectionPrintf("(%d, %d),", *downNode, *upNode);
+	//printf("%f\n", r[(*downNode)*(NUM_STA+1)+*upNode]);
+	/*for(i=0; i<NUM_STA+1;i++){
+		printf("%f, ", pro[*downNode][i]);
+	}
+	printf("\n");*/
 
 	if(numTx==1){
 		printf("\n(%d, %d),\n", *downNode, *upNode);

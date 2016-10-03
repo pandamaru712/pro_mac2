@@ -34,6 +34,7 @@ double dummyAeq[2][(NUM_STA+1)*(NUM_STA+1)];
 double Aeq[2][(NUM_STA+1)*(NUM_STA+1)];
 double beq[2] = {100, 0};
 double lb[(NUM_STA+1)*(NUM_STA+1)] = {};
+double ub[(NUM_STA+1)*(NUM_STA+1)] = {};
 
 void showProgression(int*);
 
@@ -105,7 +106,7 @@ int main(int argc, char *argv[]){
 				}
 				lastBeacon = gElapsedTime;
 			}
-			printf("%f\n", gElapsedTime);
+			//printf("%f\n", gElapsedTime);
 			#ifdef PROGRESS
 				showProgression(&previousCount);
 			#endif
