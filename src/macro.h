@@ -1,7 +1,7 @@
 #ifndef _macro_h
 #define _macro_h
 
-//#define SHOW_PROCESS
+#define SHOW_PROCESS
 //#define SHOW_OPTIMIZATION
 //#define SHOW_PROBABILITY
 //#define SHOW_RATE

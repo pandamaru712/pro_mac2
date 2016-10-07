@@ -6,8 +6,8 @@ lambdaSta 0.1
 output default %出力ファイル
 area 100
 delayPower 0.3
-position 1
-optMode 0 #0: data rate 1:data*delay 5:max 6:rand
+position 3
+optMode 5 #0: data rate 1:data*delay 5:max 6:rand
 giveU 0.5 %与える値
 dNode 5
 rateMode 1

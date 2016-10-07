@@ -116,6 +116,7 @@ void solveLP(){
 	mxDestroyArray(mx_Aeq);
 	mxDestroyArray(mx_beq);
 	mxDestroyArray(mx_lb);
+	mxDestroyArray(mx_ub);
 	mxDestroyArray(mx_p);
 	mxDestroyArray(mx_fval);
 	//engEvalString(gEp, "close;");
@@ -453,9 +454,9 @@ int selectNode(apInfo *ap, staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *
 	}
 	printf("\n");*/
 
-	if(numTx==1){
+	/*if(numTx==1){
 		printf("\n(%d, %d),\n", *downNode, *upNode);
-	}
+	}*/
 
 	free(proUp);
 	free(proDown);

@@ -114,6 +114,9 @@ void simulationResult(staInfo sta[], apInfo *ap, resultInfo *result, int trialID
 			fprintf(gSpec.output, "STAの平均遅延は%f us\n", result->aveStaDelay / gSpec.numTrial);
 			fprintf(gSpec.output, "APの遅延は%f us\n", result->apDelay / gSpec.numTrial);
 			fprintf(gSpec.output, "システムの平均遅延は%f us\n", result->aveDelay / gSpec.numTrial);
+			fprintf(gSpec.output, "送信機会のFairness indexは%f \n", result->oppJFI / gSpec.numTrial);
+			fprintf(gSpec.output, "待機時間のFairness indexは%f \n", result->dlyJFI / gSpec.numTrial);
+			fprintf(gSpec.output, "スループットのFairness indexは%f \n", result->thrJFI / gSpec.numTrial);
 
 			fprintf(gSpec.output, "**********\n\n\n");
 		}
