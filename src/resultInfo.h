@@ -20,6 +20,12 @@ typedef struct resultInformation{
 	double oppJFI;
 	double thrJFI;
 	double dlyJFI;
+	int totalNumOptimization;
+	double aveTimeOptimization;
+	double totalTimeOptimization;
+	double totalTimeSimulation;
+	double proHalfDuplex;
+	double proFullDuplex;
 }resultInfo;
 
 #endif

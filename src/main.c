@@ -3,6 +3,7 @@
 #include <string.h>
 #include <getopt.h>
 #include <unistd.h>
+#include <sys/time.h>
 #include "nodeInfo.h"
 #include "setting.h"
 #include "initialization.h"
@@ -19,6 +20,11 @@
 #include "tmwtypes.h"
 
 double gElapsedTime;
+int gNumOptimization;
+double gTotalTimeOptimization;
+double gTimeSimulation;
+int gNumHalfDuplex;
+int gNumFullDuplex;
 std11 gStd;
 simSpec gSpec;
 FILE *gFileSta;
@@ -40,6 +46,7 @@ double distance[NUM_STA+1][NUM_STA+1] = {};
 void showProgression(int*);
 
 int main(int argc, char *argv[]){
+	struct timeval start, end;
 	//Check option values from command line.
 	//checkOption(argc, argv);
 	//Apply option values to simulation settings.
@@ -82,6 +89,7 @@ int main(int argc, char *argv[]){
 	printf("Open MATLAB engine.\n");
 
 	for (trialID=0; trialID<gSpec.numTrial; trialID++){
+		gettimeofday(&start, NULL);
 		printf("\n***** %d/%d *****\n", trialID+1, gSpec.numTrial);
 		srand(9);
 		numTx = 0;
@@ -90,6 +98,11 @@ int main(int argc, char *argv[]){
 		initializeNodeInfo(sta, &ap);
 		calculateDistance(&ap, sta);
 		gElapsedTime = gStd.difs;
+		gNumOptimization = 0;
+		gTotalTimeOptimization = 0;
+		gNumHalfDuplex = 0;
+		gNumFullDuplex = 0;
+		gTimeSimulation = 0;
 		initializeMatrix();
 		printf("Initialization NodeInfo and Matrix.\n");
 		if(gSpec.proMode!=6 && gSpec.proMode!=7){
@@ -113,7 +126,8 @@ int main(int argc, char *argv[]){
 				showProgression(&previousCount);
 			#endif
 		}
-
+		gettimeofday(&end, NULL);
+		gTimeSimulation = (double)(end.tv_sec - start.tv_sec) + (double)(end.tv_usec - start.tv_usec) / 1000000;
 		simulationResult(sta, &ap, &result, trialID);
 	}
 
@@ -130,6 +144,7 @@ int main(int argc, char *argv[]){
 		fclose(gFileTopology);
 	}
 	printf("Close MATLAB.\nFinish.\n");
+	
 	return 0;
 }
 

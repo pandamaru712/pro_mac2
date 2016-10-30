@@ -6,6 +6,11 @@
 
 extern double gElapsedTime;
 extern simSpec gSpec;
+extern int gNumOptimization;
+extern double gTotalTimeOptimization;
+extern double gTimeSimulation;
+extern int gNumHalfDuplex;
+extern int gNumFullDuplex;
 
 void simulationResult(staInfo sta[], apInfo *ap, resultInfo *result, int trialID){
 	int i;
@@ -21,6 +26,7 @@ void simulationResult(staInfo sta[], apInfo *ap, resultInfo *result, int trialID
 	long opp = 0;
 	double dly = 0;
 	double thr = 0;
+	long totalTXOP = 0;
 
 	for(i=0; i<gSpec.numSta; i++){
 		rNumFrameTx += sta[i].numTxFrame;
@@ -77,6 +83,15 @@ void simulationResult(staInfo sta[], apInfo *ap, resultInfo *result, int trialID
 	result->thrJFI += pow((double)rByteFrameSucc * 8 / gElapsedTime, 2) / (NUM_STA * thr);
 	result->dlyJFI += pow(rDelay, 2) / (NUM_STA * dly);
 
+	result->totalNumOptimization += gNumOptimization;
+	result->totalTimeOptimization += gTotalTimeOptimization;
+	result->aveTimeOptimization += gTotalTimeOptimization / gNumOptimization;
+	result->totalTimeSimulation += gTimeSimulation;
+
+	totalTXOP = gNumHalfDuplex + gNumFullDuplex;
+	result->proHalfDuplex += (double)gNumHalfDuplex / totalTXOP;
+	result->proFullDuplex += (double)gNumFullDuplex / totalTXOP;
+
 	for(i=0; i<NUM_STA; i++){
 		//printf("%ld\n", sta[i].numSuccFrame);
 		//result->proUp[i] += (double)sta[i].numSuccFrame / rNumFrameSucc;
@@ -102,6 +117,10 @@ void simulationResult(staInfo sta[], apInfo *ap, resultInfo *result, int trialID
 		printf("送信機会のFairness indexは%f \n", result->oppJFI / gSpec.numTrial);
 		printf("待機時間のFairness indexは%f \n", result->dlyJFI / gSpec.numTrial);
 		printf("スループットのFairness indexは%f \n", result->thrJFI / gSpec.numTrial);
+		printf("総最適化回数は%d，総最適化時間は%f秒，平均所要時間は%f秒\n", result->totalNumOptimization, result->totalTimeOptimization, result->aveTimeOptimization/gSpec.numTrial);
+		printf("試行回数は%d，総シミュレーション時間は%f秒，平均%f秒\n", gSpec.numTrial, result->totalTimeSimulation, result->totalTimeSimulation/gSpec.numTrial);
+		printf("Half-duplex: %f%%\n", result->proHalfDuplex/gSpec.numTrial);
+		printf("Full-duplex: %f%%\n", result->proFullDuplex/gSpec.numTrial);
 		if(gSpec.fOutput==true){
 			fprintf(gSpec.output, "\n");
 
@@ -117,7 +136,10 @@ void simulationResult(staInfo sta[], apInfo *ap, resultInfo *result, int trialID
 			fprintf(gSpec.output, "送信機会のFairness indexは%f \n", result->oppJFI / gSpec.numTrial);
 			fprintf(gSpec.output, "待機時間のFairness indexは%f \n", result->dlyJFI / gSpec.numTrial);
 			fprintf(gSpec.output, "スループットのFairness indexは%f \n", result->thrJFI / gSpec.numTrial);
-
+			fprintf(gSpec.output, "総最適化回数は%d，総最適化時間は%f秒，平均所要時間は%f秒\n", result->totalNumOptimization, result->totalTimeOptimization, result->aveTimeOptimization/gSpec.numTrial);
+			fprintf(gSpec.output, "試行回数は%d，総シミュレーション時間は%f秒，平均%f秒\n", gSpec.numTrial, result->totalTimeSimulation, result->totalTimeSimulation/gSpec.numTrial);
+			fprintf(gSpec.output, "Half-duplex: %f%%\n", result->proHalfDuplex/gSpec.numTrial);
+			fprintf(gSpec.output, "Full-duplex: %f%%\n", result->proFullDuplex/gSpec.numTrial);
 			fprintf(gSpec.output, "**********\n\n\n");
 		}
 	}

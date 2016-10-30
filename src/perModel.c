@@ -25,7 +25,7 @@ void calculateDistance(apInfo *ap, staInfo sta[]){
 			}else if(down==0 && up!=0){
 				distance[down][up] = sqrt(pow(sta[up-1].x-ap->x, 2) + pow(sta[up-1].y-ap->y, 2));
 			}else if(down==up){
-				printf("Error 107\n");
+				//printf("Error 107\n");
 			}else{
 				distance[down][up] = sqrt(pow(sta[down-1].x-sta[up-1].x, 2) + pow(sta[down-1].y-sta[up-1].y, 2));
 			}
@@ -77,7 +77,7 @@ void calculateRSSI(apInfo *ap, staInfo sta[], double delay[]){
 				snr = rssi - gSpec.noise;// pow(10,(rssi)/10)/(pow(10,(gSpec.noise)/10)+pow(10,(gSpec.ICI)/10));
 				if(snr<9.63){
 					r_mat[i][j] = 0;
-				}else if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5){
+				}else if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5||gSpec.proMode==6){
 					r_mat[i][j] = shannon(dbm2mw(snr));//downlink = 20*log2(1+snr);
 				}else if(gSpec.proMode==1||gSpec.proMode==4){
 					r_mat[i][j] = shannon(dbm2mw(snr)) * pow(delay[j], gSpec.delayPower);
@@ -88,7 +88,7 @@ void calculateRSSI(apInfo *ap, staInfo sta[], double delay[]){
 				snr = rssi - gSpec.noise;
 				if(snr<9.63){
 					r_mat[i][j] = 0;
-				}else if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5){
+				}else if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5||gSpec.proMode==6){
 					r_mat[i][j] = shannon(dbm2mw(snr));
 				}else if(gSpec.proMode==1||gSpec.proMode==4){
 					r_mat[i][j] = shannon(dbm2mw(snr)) * pow(delay[j], gSpec.delayPower);
@@ -100,7 +100,7 @@ void calculateRSSI(apInfo *ap, staInfo sta[], double delay[]){
 				snr = rssi - gSpec.noise - gSpec.ICIth;
 				if(snr<9.63){
 					downlink = 0;
-				}else if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5){
+				}else if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5||gSpec.proMode==6){
 					downlink = shannon(dbm2mw(snr));
 				}else if(gSpec.proMode==1||gSpec.proMode==4){
 					downlink = shannon(dbm2mw(snr));// * delay[0] / 10000;
@@ -113,7 +113,7 @@ void calculateRSSI(apInfo *ap, staInfo sta[], double delay[]){
 					sinr = mw2dbm(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC)));
 					if(sinr<9.63){
 						uplink = 0;
-					}else if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5){
+					}else if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5||gSpec.proMode==6){
 						uplink = shannon(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC)));
 					}else if(gSpec.proMode==1||gSpec.proMode==4){
 						uplink = shannon(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC)));// * delay[j] / 10000;
@@ -129,7 +129,7 @@ void calculateRSSI(apInfo *ap, staInfo sta[], double delay[]){
 					sinr = mw2dbm(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC)));
 					if(sinr<9.63){
 						uplink = 0;
-					}else if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5){
+					}else if(gSpec.proMode==0||gSpec.proMode==2||gSpec.proMode==3||gSpec.proMode==5||gSpec.proMode==6){
 						uplink = shannon(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC)));
 					}else if(gSpec.proMode==1||gSpec.proMode==4){
 						uplink = shannon(dbm2mw(rssi)/(dbm2mw(gSpec.noise)+dbm2mw(ap->txPower-gSpec.SIC)));// * delay[j] / 10000;
@@ -181,6 +181,7 @@ void calculateRSSI(apInfo *ap, staInfo sta[], double delay[]){
 				ratePrintf("%f, ", r[i*(NUM_STA+1)+j]);
 				ub[i*(NUM_STA+1)+j] = 100;
 			}else{
+				r[i*(NUM_STA+1)+j] = -r_mat[i][j];
 				ub[i*(NUM_STA+1)+j] = 0;
 				ratePrintf("%f, ", r[i*(NUM_STA+1)+j]);
 			}

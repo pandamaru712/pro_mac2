@@ -1,7 +1,7 @@
 #ifndef _macro_h
 #define _macro_h
 
-#define SHOW_PROCESS
+//#define SHOW_PROCESS
 //#define SHOW_OPTIMIZATION
 //#define SHOW_PROBABILITY
 //#define SHOW_RATE
@@ -11,7 +11,7 @@
 
 
 #define BUFFER_SIZE 200
-#define NUM_STA 10
+#define NUM_STA 50
 #define EP_BUFFER_SIZE 2048
 #define STR_MAX 256
 #define CONFIG_FILE "config.txt"

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <sys/time.h>
 //#include "probability.h"
 #include "perModel.h"
 #include "engine.h"
@@ -13,6 +14,10 @@
 #include "Initialization.h"
 
 extern Engine *gEp;
+extern int gNumOptimization;
+extern double gTotalTimeOptimization;
+extern int gNumHalfDuplex;
+extern int gNumFullDuplex;
 extern double r[(NUM_STA+1)*(NUM_STA+1)];
 extern double pro[NUM_STA+1][NUM_STA+1];
 extern double dummyA[NUM_STA*2][(NUM_STA+1)*(NUM_STA+1)];
@@ -29,6 +34,10 @@ void solveLP(){
 	int tate = NUM_STA * 2;
 	int yoko = pow(NUM_STA+1, 2);
 	//char buffer[EP_BUFFER_SIZE] = {'\0'};
+
+	struct timeval start, end;
+	gettimeofday(&start, NULL);
+	gNumOptimization++;
 
 	optimizationPrintf("Setting matrixes.\n");
 
@@ -120,6 +129,9 @@ void solveLP(){
 	mxDestroyArray(mx_p);
 	mxDestroyArray(mx_fval);
 	//engEvalString(gEp, "close;");
+
+	gettimeofday(&end, NULL);
+	gTotalTimeOptimization += (double)(end.tv_sec - start.tv_sec) + (double)(end.tv_usec - start.tv_usec) / 1000000;
 }
 
 void calculateProbability(staInfo sta[], apInfo *ap){
@@ -448,6 +460,16 @@ int selectNode(apInfo *ap, staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *
 		//printf("\ncollision\n");
 	}
 	selectionPrintf("(%d, %d),", *downNode, *upNode);
+
+	if(*downNode==0&&*upNode!=0){
+		gNumHalfDuplex++;
+	}else if(*downNode!=0&&*upNode==0){
+		gNumHalfDuplex++;
+	}else if(*downNode!=0&&*upNode!=0){
+		gNumFullDuplex++;
+	}else{
+		printf("Selection error\n");
+	}
 	//printf("%f\n", r[(*downNode)*(NUM_STA+1)+*upNode]);
 	/*for(i=0; i<NUM_STA+1;i++){
 		printf("%f, ", pro[*downNode][i]);
