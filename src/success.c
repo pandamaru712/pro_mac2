@@ -126,6 +126,10 @@ void transmission(staInfo sta[], apInfo *ap){
 			totalTime = (double)minBackoff * gStd.slot + apLength + gStd.sifs + gStd.timeAck;
 		}
 		gElapsedTime += totalTime;
+		//printf("%f, ", totalTime);
+		if(totalTime>10000){
+			printf("error\n");
+		}
 		gSpec.sumTotalTime += totalTime;
 		arriveAp(ap, totalTime);
 		for(i=0; i<gSpec.numSta; i++){
@@ -191,6 +195,10 @@ void transmission(staInfo sta[], apInfo *ap){
 		//txTimeFrameLength = gStd.phyHeader + 4 * ((gStd.macService + 8* (gStd.macHeader + txFrameLength + gStd.macFcs) + gStd.macTail + (4 * gStd.dataRate - 1)) / (4 * gStd.dataRate));
 		//totalTime = txTimeFrameLength + gStd.sifs + gStd.timeAck;
 		gElapsedTime += totalTime;
+		//printf("%f, ", totalTime);
+		if(totalTime>10000){
+			printf("error\n");
+		}
 		gSpec.sumTotalTime += totalTime;
 		arriveAp(ap, totalTime);
 		for(i=0; i<gSpec.numSta; i++){

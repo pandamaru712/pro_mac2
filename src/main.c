@@ -23,7 +23,8 @@ double gElapsedTime;
 int gNumOptimization;
 double gTotalTimeOptimization;
 double gTimeSimulation;
-int gNumHalfDuplex;
+int gNumApHalfDuplex;
+int gNumStaHalfDuplex;
 int gNumFullDuplex;
 std11 gStd;
 simSpec gSpec;
@@ -100,7 +101,8 @@ int main(int argc, char *argv[]){
 		gElapsedTime = gStd.difs;
 		gNumOptimization = 0;
 		gTotalTimeOptimization = 0;
-		gNumHalfDuplex = 0;
+		gNumApHalfDuplex = 0;
+		gNumStaHalfDuplex = 0;
 		gNumFullDuplex = 0;
 		gTimeSimulation = 0;
 		initializeMatrix();
@@ -144,7 +146,7 @@ int main(int argc, char *argv[]){
 		fclose(gFileTopology);
 	}
 	printf("Close MATLAB.\nFinish.\n");
-	
+
 	return 0;
 }
 

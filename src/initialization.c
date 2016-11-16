@@ -32,7 +32,8 @@ void initializeResult(resultInfo *result){
 	result->totalTimeOptimization = 0;
 	result->totalNumOptimization = 0;
 	result->totalTimeSimulation = 0;
-	result->proHalfDuplex = 0;
+	result->proApHalfDuplex = 0;
+	result->proStaHalfDuplex = 0;
 	result->proFullDuplex = 0;
 }
 

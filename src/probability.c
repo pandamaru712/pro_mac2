@@ -16,7 +16,8 @@
 extern Engine *gEp;
 extern int gNumOptimization;
 extern double gTotalTimeOptimization;
-extern int gNumHalfDuplex;
+extern int gNumApHalfDuplex;
+extern int gNumStaHalfDuplex;
 extern int gNumFullDuplex;
 extern double r[(NUM_STA+1)*(NUM_STA+1)];
 extern double pro[NUM_STA+1][NUM_STA+1];
@@ -33,7 +34,7 @@ void solveLP(){
 	int i, j;
 	int tate = NUM_STA * 2;
 	int yoko = pow(NUM_STA+1, 2);
-	//char buffer[EP_BUFFER_SIZE] = {'\0'};
+	char buffer[EP_BUFFER_SIZE] = {'\0'};
 
 	struct timeval start, end;
 	gettimeofday(&start, NULL);
@@ -77,14 +78,14 @@ void solveLP(){
 	engPutVariable(gEp, "mx_lb", mx_lb);
 	engPutVariable(gEp, "mx_ub", mx_ub);
 
-	//engOutputBuffer(gEp, buffer, EP_BUFFER_SIZE);
+	engOutputBuffer(gEp, buffer, EP_BUFFER_SIZE);
 	//engEvalString(gEp, "mx_r");
 	//printf("%s", buffer);
 
 	optimizationPrintf("Optimization starts.\n");
 
 	engEvalString(gEp, "[p, fval] = linprog(mx_r, mx_A, mx_u, mx_Aeq, mx_beq, mx_lb, mx_ub);");
-	//printf("%s", buffer);
+	printf("%s", buffer);
 	engEvalString(gEp, "p = p ./ 100;");
 	engEvalString(gEp, "fval = fval / (-100);");
 	//printf("%s", buffer);
@@ -215,18 +216,32 @@ void initializeMatrix(){
 			u[i] = 0;
 		}
 	}else if(gSpec.proMode!=3&&gSpec.proMode!=4){
-		for(i=0; i<NUM_STA*2; i++){
-			u[i] = -100/(2*NUM_STA);
+		if(gSpec.lower==0){
+			for(i=0; i<NUM_STA; i++){
+				u[i] = (double)-100/(2*NUM_STA);
+			}
+			for(; i<NUM_STA*2; i++){
+				u[i] = (double)-100/(NUM_STA*2);
+			}
+		}else if(gSpec.lower==1){
+			for(i=0; i<NUM_STA; i++){
+				u[i] = (double)-100/((NUM_STA+1)*NUM_STA);
+				printf("%f\n", u[i]);
+			}
+			for(; i<NUM_STA*2; i++){
+				u[i] = (double)-100/(NUM_STA+1);
+				printf("%f\n", u[i]);
+			}
 		}
 	}else{
 		for(i=0; i<NUM_STA*2; i++){
 			if(i<NUM_STA){
-				u[i] = -100/(2*NUM_STA);
+				u[i] = (double)-100/(2*NUM_STA);
 			}else if(i<NUM_STA*2-gSpec.delaySTA){
-				u[i] = -100/(2*NUM_STA) + gSpec.giveU;
+				u[i] = (double)-100/(2*NUM_STA) + gSpec.giveU;
 				matrixPrintf("%f\n", u[i]);
 			}else{
-				u[i] = -100/(2*NUM_STA) - gSpec.giveU*(NUM_STA-gSpec.delaySTA)/gSpec.delaySTA;
+				u[i] = (double)-100/(2*NUM_STA) - gSpec.giveU*(NUM_STA-gSpec.delaySTA)/gSpec.delaySTA;
 				matrixPrintf("%f\n", u[i]);
 			}
 		}
@@ -462,9 +477,9 @@ int selectNode(apInfo *ap, staInfo sta[], bool *fUpColl, bool *fNoUplink, bool *
 	selectionPrintf("(%d, %d),", *downNode, *upNode);
 
 	if(*downNode==0&&*upNode!=0){
-		gNumHalfDuplex++;
+		gNumStaHalfDuplex++;
 	}else if(*downNode!=0&&*upNode==0){
-		gNumHalfDuplex++;
+		gNumApHalfDuplex++;
 	}else if(*downNode!=0&&*upNode!=0){
 		gNumFullDuplex++;
 	}else{

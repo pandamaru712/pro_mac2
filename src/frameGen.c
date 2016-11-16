@@ -41,7 +41,7 @@ int traffic(bool isSta){
 			if(isSta==false){
 				lengthMsdu = 1500;
 			}else{
-				lengthMsdu = 500;
+				lengthMsdu = 64;
 			}
 			break;
 		default:
