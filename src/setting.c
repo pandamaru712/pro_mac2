@@ -60,7 +60,7 @@ void simSetting(int argc, char **argv){
 	gSpec.fOutput = false;
 	gSpec.proMode = 0;
 	gSpec.position = 0;
-	gSpec.delayPower = 1;
+	gSpec.delayPower = 0.1;
 	gSpec.giveU = 0.5;
 	gSpec.delaySTA = 5;
 	gSpec.rateMode = 0;
@@ -220,8 +220,8 @@ void simSetting(int argc, char **argv){
 		printf("   Traffic pattern is 1500/1500.\n");
 		printf("   Offered load of STA is %f Mbit/s.\n", gSpec.lambdaSta*1500*8);
 	}else if(gSpec.trafficPattern==1){
-		printf("   Traffic pattern is 1500/500.\n");
-		printf("   Offered load of STA is %f Mbit/s.\n", gSpec.lambdaSta*500*8);
+		printf("   Traffic pattern is 1500/64.\n");
+		printf("   Offered load of STA is %f Mbit/s.\n", gSpec.lambdaSta*64*8);
 	}
 	printf("   Area size is %d m.\n", gSpec.areaSize);
 	printf("   Delay Mode is %d.\n", gSpec.delayMode);
@@ -295,8 +295,8 @@ void simSetting(int argc, char **argv){
 			fprintf(gSpec.output, "   Traffic pattern is 1500/1500.\n");
 			fprintf(gSpec.output, "   Offered load of STA is %f Mbit/s.\n", gSpec.lambdaSta*1500*8);
 		}else if(gSpec.trafficPattern==1){
-			fprintf(gSpec.output, "   Traffic pattern is 1500/500.\n");
-			fprintf(gSpec.output, "   Offered load of STA is %f Mbit/s.\n", gSpec.lambdaSta*500*8);
+			fprintf(gSpec.output, "   Traffic pattern is 1500/64.\n");
+			fprintf(gSpec.output, "   Offered load of STA is %f Mbit/s.\n", gSpec.lambdaSta*64*8);
 		}
 		fprintf(gSpec.output, "   Area size is %d m.\n", gSpec.areaSize);
 		fprintf(gSpec.output, "   Delay Mode is %d.\n", gSpec.delayMode);

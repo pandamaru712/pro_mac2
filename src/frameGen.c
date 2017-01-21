@@ -28,6 +28,7 @@ double poisson(bool isSta){
 
 int traffic(bool isSta){
 	int lengthMsdu;
+	double temp;
 
 	switch(gSpec.trafficPattern){
 		case 0:
@@ -42,6 +43,22 @@ int traffic(bool isSta){
 				lengthMsdu = 1500;
 			}else{
 				lengthMsdu = 64;
+			}
+			break;
+		case 2:
+			temp = rand() / RAND_MAX;
+			if(isSta==false){
+				if(temp<0.5){
+					lengthMsdu = 64;
+				}else{
+					lengthMsdu = 1500;
+				}
+			}else{
+				if(temp<0.5){
+					lengthMsdu = 64;
+				}else{
+					lengthMsdu = 1500;
+				}
 			}
 			break;
 		default:

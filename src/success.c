@@ -44,6 +44,8 @@ void transmission(staInfo sta[], apInfo *ap){
 	//int rxSta = INT_MAX;
 	int apLength = 0;
 	int staLength = 0;
+	int checkAp = 0;
+	int checkSta = 0;
 	minBackoff = selectNode(ap, sta, &fUpColl, &fNoUplink, &fNoDownlink, &upNode, &downNode);
 	//printf("%d\n", minBackoff);
 
@@ -66,6 +68,7 @@ void transmission(staInfo sta[], apInfo *ap){
 		}
 		//Uplinl successed.
 		if(fNoDownlink==false){
+			checkAp++;
 			ap->sumFrameLengthInBuffer -= ap->buffer[0].lengthMsdu;
 			ap->byteSuccFrame += ap->buffer[0].lengthMsdu;
 			//txFrameLength = ap->buffer[0].lengthMsdu;
@@ -86,6 +89,7 @@ void transmission(staInfo sta[], apInfo *ap){
 			gSpec.succ++;
 			for(i=0; i<gSpec.numSta; i++){
 				if(sta[i].fTx==true){
+					checkSta++;
 					//sta[i].backoffCount = rand() % (sta[i].cw + 1);
 					sta[i].fTx = false;
 					sta[i].sumFrameLengthInBuffer -= sta[i].buffer[0].lengthMsdu;
@@ -97,6 +101,7 @@ void transmission(staInfo sta[], apInfo *ap){
 					sta[i].buffer[0].lengthMsdu = 0;
 					//printf("%f\n", sta[i].buffer[0].timeStamp);
 					sta[i].sumDelay += (gElapsedTime - sta[i].buffer[0].timeStamp);
+					//printf("%f, ", gElapsedTime - sta[i].buffer[0].timeStamp);
 					sta[i].buffer[0].timeStamp = 0;
 					sta[i].numTxFrame++;
 					sta[i].numSuccFrame++;
@@ -124,6 +129,12 @@ void transmission(staInfo sta[], apInfo *ap){
 			totalTime = (double)minBackoff * gStd.slot + staLength + gStd.sifs + gStd.timeAck;
 		}else{
 			totalTime = (double)minBackoff * gStd.slot + apLength + gStd.sifs + gStd.timeAck;
+		}
+		if(checkAp!=1&&fNoDownlink==false){
+			printf("AP error %d\n", checkAp);
+		}
+		if(checkSta!=1&&fNoUplink==false){
+			printf("STA error\n");
 		}
 		gElapsedTime += totalTime;
 		//printf("%f, ", totalTime);
@@ -159,6 +170,7 @@ void transmission(staInfo sta[], apInfo *ap){
 		}
 		for(i=0; i<gSpec.numSta; i++){
 			if(sta[i].fTx==true){
+				checkSta++;
 				//sta[i].backoffCount = rand() % (sta[i].cw + 1);
 				sta[i].fTx = false;
 				sta[i].numTxFrame++;
@@ -177,6 +189,9 @@ void transmission(staInfo sta[], apInfo *ap){
 					sta[i].fRx = false;
 				}*/
 			}
+		}
+		if(checkSta<1){
+			printf("sta coll error %d\n", checkSta);
 		}
 		//printf("%d\n", staLength);
 		if(apLength==0&&staLength==0){

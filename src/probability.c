@@ -85,7 +85,7 @@ void solveLP(){
 	optimizationPrintf("Optimization starts.\n");
 
 	engEvalString(gEp, "[p, fval] = linprog(mx_r, mx_A, mx_u, mx_Aeq, mx_beq, mx_lb, mx_ub);");
-	printf("%s", buffer);
+	//printf("%s", buffer);
 	engEvalString(gEp, "p = p ./ 100;");
 	engEvalString(gEp, "fval = fval / (-100);");
 	//printf("%s", buffer);
@@ -110,6 +110,15 @@ void solveLP(){
 			probabilityPrintf("%f,", pro[i][j]);
 		}
 		probabilityPrintf("\n");
+	}
+	double temp[NUM_STA+1] = {};
+	for(i=0; i<=NUM_STA; i++){
+		for(j=0; j<=NUM_STA; j++){
+			temp[i] += pro[j][i];
+		}
+	}
+	for(i=0; i<NUM_STA+1; i++){
+		//printf("sta %d: %f, ", i, temp[i]);
 	}
 
 	for(i=0; i<yoko; i++){
@@ -226,11 +235,9 @@ void initializeMatrix(){
 		}else if(gSpec.lower==1){
 			for(i=0; i<NUM_STA; i++){
 				u[i] = (double)-100/((NUM_STA+1)*NUM_STA);
-				printf("%f\n", u[i]);
 			}
 			for(; i<NUM_STA*2; i++){
 				u[i] = (double)-100/(NUM_STA+1);
-				printf("%f\n", u[i]);
 			}
 		}
 	}else{

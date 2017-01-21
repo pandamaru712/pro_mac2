@@ -92,7 +92,7 @@ int main(int argc, char *argv[]){
 	for (trialID=0; trialID<gSpec.numTrial; trialID++){
 		gettimeofday(&start, NULL);
 		printf("\n***** %d/%d *****\n", trialID+1, gSpec.numTrial);
-		srand(9);
+		srand(trialID);
 		numTx = 0;
 		fEmpty = false;
 		lastBeacon = 0;

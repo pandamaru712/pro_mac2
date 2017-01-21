@@ -45,7 +45,9 @@ void simulationResult(staInfo sta[], apInfo *ap, resultInfo *result, int trialID
 	printf("AP: %f\n", (double)ap->numTxFrame/gSpec.chance);
 	for(i=0; i<NUM_STA; i++){
 		printf("sta %d: %f, ", i, (double)sta[i].numTxFrame/gSpec.chance);
+		printf("%f\n", sta[i].sumDelay/sta[i].numSuccFrame);
 	}
+	printf("\n%ld, %ld\n", rNumFrameTx, ap->numTxFrame);
 
 	//printf("%ld, %ld, %ld\n\n", rNumFrameTx, rNumFrameSucc, rNumFrameColl);
 
@@ -80,6 +82,7 @@ void simulationResult(staInfo sta[], apInfo *ap, resultInfo *result, int trialID
 	result->apDelay += ap->sumDelay / ap->numSuccFrame;
 	result->aveDelay += (rSumDelay + ap->sumDelay) / (rNumFrameSucc + ap->numSuccFrame);
 	printf("%ld, %ld\n", ap->numSuccFrame, rNumFrameSucc);
+	printf("%f\n", rSumDelay/rNumFrameSucc);
 
 	result->proColl += (double)gSpec.coll / gSpec.chance;
 	result->aveTotalTime += (double)gSpec.sumTotalTime / gSpec.chance;
@@ -106,7 +109,7 @@ void simulationResult(staInfo sta[], apInfo *ap, resultInfo *result, int trialID
 	for(i=0; i<NUM_STA; i++){
 		//printf("%ld\n", sta[i].numSuccFrame);
 		//result->proUp[i] += (double)sta[i].numSuccFrame / rNumFrameSucc;
-		//printf("%ld\n", sta[i].numTxFrame);
+		//printf("%ld\n", sta[i].numTxFrame / gSpec.chance);
 	}
 
 	if(trialID==(gSpec.numTrial-1)){
